@@ -1,6 +1,6 @@
 services:
   broker:
-    image: redis:7.4.11
+    image: redis:8.10.2
     container_name: paperless-broker
     # Paperless gives ./data (which holds ./data/redis) to UID 1000 at every start
     user: "1000:1000"

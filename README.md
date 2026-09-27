@@ -52,7 +52,8 @@ line. To see what is out of date, run on the Mac:
 ./check-updates.sh      # "update: x" = newer in the same major; "major: y" = read the notes first
 ```
 
-Deliberately held back: Redis 8 (Paperless runs fine on 7) and SQL Server 2025 (new major).
+SQL Server 2025 upgrades database files on first start and cannot be rolled back by changing
+the tag: copy `sqlserver/data` aside (container stopped) before any major SQL Server update.
 
 Take a backup first (`make backup-vm HOST=10.69.20.130 VMID=101` in proxmox-lab), check the
 app's release notes, then:
