@@ -1,0 +1,12 @@
+services:
+  uptime-kuma:
+    image: docker.io/louislam/uptime-kuma:2.5.5
+    container_name: uptime-kuma
+    restart: unless-stopped
+    volumes:
+      - ./data:/app/data
+    networks:
+      - proxy
+networks:
+  proxy:
+    external: true

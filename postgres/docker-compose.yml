@@ -1,0 +1,17 @@
+services:
+  postgres:
+    image: postgres:18.4
+    container_name: postgres
+    restart: unless-stopped
+    environment:
+      - POSTGRES_PASSWORD=${POSTGRES_SUPERUSER_PASSWORD}
+    ports:
+      - "10.69.20.114:5432:5432"
+    volumes:
+      - ./data:/var/lib/postgresql
+      - ./init:/docker-entrypoint-initdb.d:ro
+    networks:
+      - proxy
+networks:
+  proxy:
+    external: true

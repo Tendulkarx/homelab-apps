@@ -1,0 +1,23 @@
+services:
+  n8n:
+    image: ghcr.io/n8n-io/n8n:latest
+    container_name: n8n
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      - TZ=Europe/London
+      - N8N_BASIC_AUTH_ACTIVE=true
+      - N8N_BASIC_AUTH_USER=${N8N_USER}
+      - N8N_BASIC_AUTH_PASSWORD=${N8N_PASSWORD}
+      - WEBHOOK_URL=https://n8n.example.com
+      - N8N_HOST=n8n.example.com
+      - N8N_PORT=5678
+      - N8N_PROTOCOL=https
+    volumes:
+      - ./data:/home/node/.n8n
+    networks:
+      - proxy
+
+networks:
+  proxy:
+    external: true

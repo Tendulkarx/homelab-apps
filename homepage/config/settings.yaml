@@ -1,0 +1,27 @@
+title: Homepage
+theme: light
+color: zinc
+headerStyle: clean
+useEqualHeights: true
+fullWidth: true
+hideVersion: true
+statusStyle: dot
+
+quicklaunch:
+  searchDescriptions: true
+  hideInternetSearch: false
+  provider: duckduckgo
+
+layout:
+  Home Lab:
+    style: row
+    columns: 4
+  Data and Automation:
+    style: row
+    columns: 4
+  Homelab Resources:
+    style: row
+    columns: 4
+  Accounts:
+    style: row
+    columns: 4

@@ -1,0 +1,24 @@
+services:
+  metabase:
+    image: metabase/metabase:latest
+    container_name: metabase
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      - TZ=Europe/London
+      - MB_DB_TYPE=postgres
+      - MB_DB_DBNAME=metabase
+      - MB_DB_PORT=5432
+      - MB_DB_USER=metabase
+      - MB_DB_PASS=${METABASE_DB_PASSWORD}
+      - MB_DB_HOST=postgres
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - ./data/plugins:/plugins
+    networks:
+      - proxy
+
+networks:
+  proxy:
+    external: true

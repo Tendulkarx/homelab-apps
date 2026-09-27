@@ -1,0 +1,17 @@
+services:
+  oracle:
+    image: container-registry.oracle.com/database/free:latest
+    container_name: oracle
+    restart: unless-stopped
+    environment:
+      - ORACLE_PWD=${ORACLE_PWD}
+    ports:
+      - "10.69.20.114:1521:1521"
+    volumes:
+      - ./data:/opt/oracle/oradata
+    networks:
+      - proxy
+
+networks:
+  proxy:
+    external: true

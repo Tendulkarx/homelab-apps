@@ -1,0 +1,66 @@
+{
+	email {$ACME_EMAIL}
+}
+
+*.{$CADDY_BASE_DOMAIN} {
+	tls {
+		dns cloudflare {$CLOUDFLARE_API_TOKEN}
+	}
+
+	@arcane host arcane.{$CADDY_BASE_DOMAIN}
+	handle @arcane {
+		reverse_proxy arcane:3552
+	}
+
+	@uptime host uptime.{$CADDY_BASE_DOMAIN}
+	handle @uptime {
+		reverse_proxy uptime-kuma:3001
+	}
+
+	@metabase host metabase.{$CADDY_BASE_DOMAIN}
+	handle @metabase {
+    	reverse_proxy metabase:3000
+	}
+
+	@paperless host paperless.{$CADDY_BASE_DOMAIN}
+	handle @paperless {
+    	reverse_proxy paperless-webserver:8000
+	}
+
+	@n8n host n8n.{$CADDY_BASE_DOMAIN}
+	handle @n8n {
+		reverse_proxy n8n:5678
+	}
+
+	@homepage host home.{$CADDY_BASE_DOMAIN}
+	handle @homepage {
+		reverse_proxy homepage:3000
+	}
+
+	@pihole host pihole.{$CADDY_BASE_DOMAIN}
+	handle @pihole {
+		reverse_proxy pihole:80
+	}
+
+	@prx1 host prx1.{$CADDY_BASE_DOMAIN}
+	handle @prx1 {
+		reverse_proxy https://10.69.20.130:8006 {
+			transport http {
+				tls_insecure_skip_verify
+			}
+		}
+	}
+
+	@prx2 host prx2.{$CADDY_BASE_DOMAIN}
+	handle @prx2 {
+		reverse_proxy https://10.69.20.131:8006 {
+			transport http {
+				tls_insecure_skip_verify
+			}
+		}
+	}
+
+	handle {
+		respond "Not found" 404
+	}
+}

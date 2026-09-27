@@ -1,0 +1,42 @@
+- Homelab Resources:
+    - Awesome-Selfhosted:
+        - id: awesome-selfhosted
+          abbr: AS
+          href: https://github.com/awesome-selfhosted/awesome-selfhosted
+    - r/selfhosted:
+        - id: r-selfhosted
+          abbr: SH
+          href: https://reddit.com/r/selfhosted
+    - r/homelab:
+        - id: r-homelab
+          abbr: HL
+          href: https://reddit.com/r/homelab
+    - LinuxServer.io:
+        - id: linuxserver
+          abbr: LS
+          href: https://fleet.linuxserver.io/
+    - Proxmox Docs:
+        - id: proxmox-docs
+          abbr: PM
+          href: https://pve.proxmox.com/pve-docs/
+    - Caddy Docs:
+        - id: caddy-docs
+          abbr: CD
+          href: https://caddyserver.com/docs/
+- Accounts:
+    - Cloudflare Dashboard:
+        - id: cloudflare
+          abbr: CF
+          href: https://dash.cloudflare.com/
+    - GitHub:
+        - id: github
+          abbr: GH
+          href: https://github.com/
+    - Docker Hub:
+        - id: dockerhub
+          abbr: DH
+          href: https://hub.docker.com/
+    - Tailscale Admin:
+        - id: tailscale-admin
+          abbr: TS
+          href: https://login.tailscale.com/admin/machines

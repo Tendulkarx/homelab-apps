@@ -1,0 +1,19 @@
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: sqlserver
+    restart: unless-stopped
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_PID=Developer
+      - MSSQL_SA_PASSWORD=${MSSQL_SA_PASSWORD}
+    ports:
+      - "10.69.20.114:1433:1433"
+    volumes:
+      - ./data:/var/opt/mssql
+    networks:
+      - proxy
+
+networks:
+  proxy:
+    external: true

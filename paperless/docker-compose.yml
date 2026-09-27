@@ -1,0 +1,59 @@
+services:
+  broker:
+    image: redis:7
+    container_name: paperless-broker
+    # Paperless gives ./data (which holds ./data/redis) to UID 1000 at every start
+    user: "1000:1000"
+    restart: unless-stopped
+    command: redis-server --stop-writes-on-bgsave-error no
+    volumes:
+      - ./data/redis:/data
+    networks:
+      - proxy
+  gotenberg:
+    image: gotenberg/gotenberg:8
+    container_name: paperless-gotenberg
+    restart: unless-stopped
+    command:
+      - "gotenberg"
+      - "--chromium-disable-javascript=true"
+      - "--chromium-allow-list=file:///tmp/.*"
+    networks:
+      - proxy
+  tika:
+    image: apache/tika:latest
+    container_name: paperless-tika
+    restart: unless-stopped
+    networks:
+      - proxy
+  webserver:
+    image: ghcr.io/paperless-ngx/paperless-ngx:latest
+    container_name: paperless-webserver
+    restart: unless-stopped
+    depends_on:
+      - broker
+      - gotenberg
+      - tika
+    env_file: .env
+    environment:
+      - PAPERLESS_REDIS=redis://broker:6379
+      - PAPERLESS_DBHOST=postgres
+      - PAPERLESS_DBNAME=paperless
+      - PAPERLESS_DBUSER=paperless
+      - PAPERLESS_DBPASS=${PAPERLESS_DB_PASSWORD}
+      - PAPERLESS_URL=https://paperless.example.com
+      - PAPERLESS_TIME_ZONE=Europe/London
+      - PAPERLESS_OCR_LANGUAGE=eng
+      - PAPERLESS_TIKA_ENABLED=1
+      - PAPERLESS_TIKA_GOTENBERG_ENDPOINT=http://gotenberg:3000
+      - PAPERLESS_TIKA_ENDPOINT=http://tika:9998
+    volumes:
+      - ./data:/usr/src/paperless/data
+      - ./media:/usr/src/paperless/media
+      - ./export:/usr/src/paperless/export
+      - ./consume:/usr/src/paperless/consume
+    networks:
+      - proxy
+networks:
+  proxy:
+    external: true
