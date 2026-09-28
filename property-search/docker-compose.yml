@@ -9,12 +9,15 @@ services:
     environment:
       - APP_ENV=prod
       - TZ=Europe/London
+    user: "1000:1000" # turbx, so run.sh can tidy the log files
     read_only: true
     tmpfs:
       - /tmp
     cap_drop: [ALL]
     security_opt: ["no-new-privileges:true"]
     mem_limit: 512m
+    volumes:
+      - ./logs:/logs # one file per run, kept 90 days (run.sh)
     networks:
       - proxy # reaches Postgres as postgres:5432
 

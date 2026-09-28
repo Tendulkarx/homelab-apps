@@ -32,6 +32,11 @@
 		reverse_proxy n8n:5678
 	}
 
+	@logs host logs.{$CADDY_BASE_DOMAIN}
+	handle @logs {
+		reverse_proxy dozzle:8080
+	}
+
 	@homepage host home.{$CADDY_BASE_DOMAIN}
 	handle @homepage {
 		reverse_proxy homepage:3000

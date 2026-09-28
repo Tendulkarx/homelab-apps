@@ -14,7 +14,8 @@ what runs. The VM itself (and the Proxmox hosts) are built by
 | `n8n` | Automation | `n8n.` |
 | `metabase` | Reporting | `metabase.` |
 | `uptime-kuma` | Uptime monitoring | `uptime.` |
-| `property-search` | Rightmove scraper job, run by n8n via `run.sh` (not a service) | none |
+| `dozzle` | Live logs of every container (login `turbx`) | `logs.` |
+| `property-search` | Rightmove scraper job, run by n8n via `run.sh` (not a service); a log file per run in `logs/` | none |
 | `arcane` | Docker web UI (edits the files in this repo on the server) | `arcane.` |
 | `postgres` | PostgreSQL 18 (Paperless, Metabase and own databases) | 10.69.20.114:5432 |
 | `sqlserver` | SQL Server 2022 | 10.69.20.114:1433 |
@@ -79,6 +80,14 @@ every setting with its 1Password reference, so a lost `.env` is rebuilt with:
 
 ```bash
 op inject -i .env.example -o .env
+```
+
+Dozzle's login (user `turbx`) is the 1Password item `prdsrv2-dozzle`. The server only holds a
+hash of it in `dozzle/data/users.yml`, which is not committed; to rebuild that file, from the Mac:
+
+```bash
+op read op://Development/prdsrv2-dozzle/password | ssh prdsrv2 'cd /opt/docker/dozzle && mkdir -p data &&
+  docker run --rm amir20/dozzle:v11.1.2 generate turbx --password "$(cat)" > data/users.yml'
 ```
 
 `postgres/init/02-users.sql` is not committed either (it contains passwords); its original

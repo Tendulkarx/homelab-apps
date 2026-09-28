@@ -11,6 +11,12 @@
         siteMonitor: https://uptime.example.com
         description: Status and monitoring
         icon: uptime-kuma.png
+    - Dozzle:
+        id: dozzle
+        href: https://logs.example.com
+        siteMonitor: https://logs.example.com
+        description: Container logs
+        icon: dozzle.png
     - Proxmox (prx1):
         id: prx1
         href: https://prx1.example.com

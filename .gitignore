@@ -8,6 +8,7 @@ caddy/init/
 */data/
 caddy/config/
 homepage/config/logs/
+property-search/logs/
 paperless/consume/
 paperless/export/
 paperless/media/
