@@ -68,6 +68,11 @@ cd /opt/docker && git pull && cd n8n && docker compose pull && docker compose up
 # Caddy is built locally: docker compose build --pull && docker compose up -d
 ```
 
+After pulling a Caddyfile change, run `docker compose restart caddy` in `caddy/` (about two
+seconds without the web apps; DNS is unaffected). `caddy reload` is not enough: the file is
+mounted on its own and `git pull` replaces it, so the container keeps the old copy until it
+restarts.
+
 To roll back, put the old tag back and run the same commands. Take care with major versions of
 Postgres, Oracle, Paperless and n8n: they change stored data, so read the upgrade notes and make
 sure a fresh backup exists first.
