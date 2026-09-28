@@ -9,7 +9,6 @@ services:
     environment:
       - APP_ENV=prod
       - TZ=Europe/London
-    user: "1000:1000" # turbx, so run.sh can tidy the log files
     read_only: true
     tmpfs:
       - /tmp
