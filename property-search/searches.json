@@ -1,0 +1,158 @@
+{
+  "scrapers": {
+    "rightmove": {
+      "base_url": "https://www.rightmove.co.uk/api/property-search/listing/search",
+      "headers": {
+        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36",
+        "Accept": "application/json, text/plain, */*",
+        "Accept-Language": "en-GB,en;q=0.9",
+        "Accept-Encoding": "gzip, deflate, br",
+        "Referer": "https://www.rightmove.co.uk/property-for-sale/find.html",
+        "Origin": "https://www.rightmove.co.uk",
+        "Connection": "keep-alive",
+        "Sec-Fetch-Dest": "empty",
+        "Sec-Fetch-Mode": "cors",
+        "Sec-Fetch-Site": "same-origin",
+        "sec-ch-ua": "\"Not_A Brand\";v=\"8\", \"Chromium\";v=\"120\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"macOS\""
+      },
+      "timeout_seconds": 30,
+      "page_delay_seconds": 0.5,
+      "max_results_per_location": 500
+    }
+  },
+  "users": [
+    {
+      "name": "Your Property Search",
+      "email": "${EMAIL_RECIPIENT}",
+      "searches": [
+        {
+          "name": "My Property Search",
+          "provider": "rightmove",
+          "locations": [
+            {
+              "name": "Uxbridge",
+              "code": "REGION^1380"
+            },
+            {
+              "name": "Ickenham",
+              "code": "REGION^13403"
+            },
+            {
+              "name": "Maidenhead",
+              "code": "REGION^896"
+            },
+            {
+              "name": "Langley",
+              "code": "REGION^14610"
+            },
+            {
+              "name": "Taplow",
+              "code": "REGION^23997"
+            },
+            {
+              "name": "Windsor",
+              "code": "REGION^1463"
+            },
+            {
+              "name": "Halstead",
+              "code": "REGION^590"
+            },
+            {
+              "name": "Enfield",
+              "code": "REGION^93950"
+            },
+            {
+              "name": "Wokingham",
+              "code": "REGION^1475"
+            },
+            {
+              "name": "St Albans",
+              "code": "REGION^1244"
+            },
+            {
+              "name": "Redhill",
+              "code": "REGION^1117"
+            },
+            {
+              "name": "Bromley",
+              "code": "REGION^93938"
+            },
+            {
+              "name": "Bexleyheath",
+              "code": "REGION^150"
+            },
+            {
+              "name": "Rochester",
+              "code": "REGION^1135"
+            },
+            {
+              "name": "Northfleet",
+              "code": "REGION^18656"
+            },
+            {
+              "name": "Gravesend",
+              "code": "REGION^570"
+            },
+            {
+              "name": "Wainscott",
+              "code": "REGION^25666"
+            },
+            {
+              "name": "Greenhithe",
+              "code": "REGION^575"
+            },
+            {
+              "name": "Ebbsfleet Valley",
+              "code": "REGION^93419"
+            },
+            {
+              "name": "Strood",
+              "code": "REGION^23617"
+            },
+            {
+              "name": "Chatham",
+              "code": "REGION^302"
+            }
+          ],
+          "parameters": {
+            "maxPrice": "475000",
+            "minPrice": "200000",
+            "sortType": "6",
+            "propertyTypes": [
+              "detached",
+              "semi-detached",
+              "terraced"
+            ],
+            "includeSSTC": false,
+            "mustHave": [
+              "parking"
+            ],
+            "dontShow": [
+              "retirement",
+              "sharedOwnership"
+            ],
+            "channel": "BUY"
+          },
+          "tracking": {
+            "google_sheet": {
+              "enabled": "${GOOGLE_SHEET_ENABLED:-true}",
+              "spreadsheet_id": "${GOOGLE_SHEET_ID:-}",
+              "sheet_name": "${GOOGLE_SHEET_NAME:-House Hunting}",
+              "worksheet_name": "${GOOGLE_WORKSHEET_NAME:-DB}"
+            },
+            "database": {
+              "enabled": "${DATABASE_ENABLED:-false}"
+            },
+            "email": {
+              "enabled": true,
+              "subject": "New Property Listings",
+              "always_send": true
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

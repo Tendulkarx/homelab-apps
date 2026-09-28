@@ -3,12 +3,13 @@
 # The "job" profile keeps `docker compose up -d` from starting it.
 services:
   property-search:
-    image: ghcr.io/tendulkarx/property-search:2.0.3
+    image: ghcr.io/tendulkarx/property-search:2.1.0
     profiles: ["job"]
     env_file: .env # OP_SERVICE_ACCOUNT_TOKEN only; every other secret comes from 1Password
     environment:
       - APP_ENV=prod
       - TZ=Europe/London
+      - PROPERTY_SEARCH_CONFIG=/config/searches.json
     read_only: true
     tmpfs:
       - /tmp
@@ -17,6 +18,7 @@ services:
     mem_limit: 512m
     volumes:
       - ./logs:/logs # one file per run, kept 90 days (run.sh)
+      - ./searches.json:/config/searches.json:ro # areas, prices, emails: edit here, no release
     networks:
       - proxy # reaches Postgres as postgres:5432
 
