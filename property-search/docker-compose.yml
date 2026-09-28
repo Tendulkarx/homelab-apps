@@ -3,7 +3,7 @@
 # The "job" profile keeps `docker compose up -d` from starting it.
 services:
   property-search:
-    image: ghcr.io/tendulkarx/property-search:2.1.0
+    image: ghcr.io/tendulkarx/property-search:2.1.1
     profiles: ["job"]
     env_file: .env # OP_SERVICE_ACCOUNT_TOKEN only; every other secret comes from 1Password
     environment:
