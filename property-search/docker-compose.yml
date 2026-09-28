@@ -1,0 +1,23 @@
+# One-shot job, not a service: n8n starts it on a schedule through run.sh (see
+# https://github.com/Tendulkarx/property-search/blob/main/docs/deployment.md).
+# The "job" profile keeps `docker compose up -d` from starting it.
+services:
+  property-search:
+    image: ghcr.io/tendulkarx/property-search:2.0.2
+    profiles: ["job"]
+    env_file: .env # OP_SERVICE_ACCOUNT_TOKEN only; every other secret comes from 1Password
+    environment:
+      - APP_ENV=prod
+      - TZ=Europe/London
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    mem_limit: 512m
+    networks:
+      - proxy # reaches Postgres as postgres:5432
+
+networks:
+  proxy:
+    external: true

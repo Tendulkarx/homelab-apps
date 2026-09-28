@@ -14,6 +14,7 @@ what runs. The VM itself (and the Proxmox hosts) are built by
 | `n8n` | Automation | `n8n.` |
 | `metabase` | Reporting | `metabase.` |
 | `uptime-kuma` | Uptime monitoring | `uptime.` |
+| `property-search` | Rightmove scraper job, run by n8n via `run.sh` (not a service) | none |
 | `arcane` | Docker web UI (edits the files in this repo on the server) | `arcane.` |
 | `postgres` | PostgreSQL 18 (Paperless, Metabase and own databases) | 10.69.20.114:5432 |
 | `sqlserver` | SQL Server 2022 | 10.69.20.114:1433 |
