@@ -150,7 +150,10 @@
               "subject": "New Property Listings",
               "always_send": true,
               "sort": "area",
-              "area_descending": true
+              "area_descending": true,
+              "pinned_areas": [
+                "Maidenhead"
+              ]
             }
           }
         }
