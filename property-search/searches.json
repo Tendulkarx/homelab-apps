@@ -148,7 +148,9 @@
             "email": {
               "enabled": true,
               "subject": "New Property Listings",
-              "always_send": true
+              "always_send": true,
+              "sort": "area",
+              "area_descending": true
             }
           }
         }
