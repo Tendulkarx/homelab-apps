@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
-# Nightly dumps of every database on prdsrv2, into /opt/backups/<date>/ (14 days kept).
-# Run by the systemd timer db-dumps.timer at 01:30, before the 02:30 VM backup, so each
-# night's dumps are also inside that backup. By hand: sudo /opt/docker/backups/dump.sh
+# Nightly dumps of the databases and app data on this host, into /opt/backups/<date>/ (14 days
+# kept). Each part runs only where its container runs: Postgres, SQL Server and Oracle on
+# prdsrv2; n8n and Paperless on prdsrv1. Run by the systemd timer db-dumps.timer at 01:30,
+# before the 02:30 VM backup, so each night's dumps are also inside that backup.
+# By hand: sudo /opt/docker/backups/dump.sh
 #
 #   postgres/<db>.dump   pg_dump custom format: pg_restore -d <db> <file>
 #   postgres/globals.sql roles and their passwords: psql -f globals.sql
@@ -25,10 +27,13 @@ failed=()
 log() { echo "$(date +%T) $*"; }
 fail() { log "FAILED: $1"; failed+=("$1"); }
 
+here() { [ "$(docker inspect -f '{{.State.Running}}' "$1" 2>/dev/null)" = true ]; }
+
 umask 077
-mkdir -p "$OUT"/{postgres,sqlserver,oracle,n8n}
+mkdir -p "$OUT"
 
 postgres() {
+  mkdir -p "$OUT/postgres"
   docker exec postgres pg_dumpall -U postgres --globals-only > "$OUT/postgres/globals.sql" || return 1
   local db dbs
   dbs=$(docker exec postgres psql -U postgres -Atc \
@@ -41,6 +46,7 @@ postgres() {
 }
 
 sqlserver() {
+  mkdir -p "$OUT/sqlserver"
   local sql='/opt/mssql-tools18/bin/sqlcmd -C -b -S localhost -U sa -P "$MSSQL_SA_PASSWORD" -h -1 -W'
   local db dbs
   # Every database but tempdb: master holds the logins, msdb the agent jobs.
@@ -56,6 +62,7 @@ sqlserver() {
 
 oracle() {
   # Data Pump writes on the server side, into DATA_PUMP_DIR; the file is streamed out and removed.
+  mkdir -p "$OUT/oracle"
   local dir
   dir=$(printf 'set heading off feedback off pagesize 0\nalter session set container=FREEPDB1;\nselect directory_path from dba_directories where directory_name = %s;\n' "'DATA_PUMP_DIR'" |
     docker exec -i oracle sqlplus -s / as sysdba | tr -d '[:space:]')
@@ -70,6 +77,7 @@ oracle() {
 }
 
 n8n() {
+  mkdir -p "$OUT/n8n"
   python3 - "$OUT/n8n/database.sqlite" <<'PY' || return 1
 import sqlite3, sys
 src = sqlite3.connect("file:/opt/docker/n8n/data/database.sqlite?mode=ro", uri=True)
@@ -87,9 +95,14 @@ paperless() {
   log "paperless $(du -h "$OUT/paperless.tar.gz" | cut -f1)"
 }
 
-for part in postgres sqlserver oracle n8n paperless; do
-  "$part" || fail "$part"
+# part:container that must be running on this host for the part to apply
+ran=0
+for pc in postgres:postgres sqlserver:sqlserver oracle:oracle n8n:n8n paperless:paperless-webserver; do
+  here "${pc#*:}" || continue
+  ran=$((ran + 1))
+  "${pc%%:*}" || fail "${pc%%:*}"
 done
+[ "$ran" -gt 0 ] || fail "nothing to back up on $(hostname)"
 
 find "$ROOT" -mindepth 1 -maxdepth 1 -type d -mtime +"$KEEP_DAYS" -exec rm -rf {} +
 log "total $(du -sh "$OUT" | cut -f1) in $OUT"

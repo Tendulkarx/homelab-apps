@@ -16,8 +16,9 @@ set -euo pipefail
 
 VAULT=Development
 ITEM=prdsrv2-rclone
-HOST=turbx@10.69.20.114
-SSH=(ssh -i "$HOME/.ssh/id_ed25519_homelab" -o BatchMode=yes "$HOST")
+# Every host with db_backups (proxmox-lab inventory): prdsrv2 (databases), prdsrv1 (n8n, Paperless)
+HOSTS=(turbx@10.69.20.114 turbx@10.69.20.113)
+ssh_to() { ssh -i "$HOME/.ssh/id_ed25519_homelab" -o BatchMode=yes "$@"; }
 
 command -v rclone >/dev/null || brew install rclone
 
@@ -64,13 +65,16 @@ salt=$(rclone obscure "$(op read "op://$VAULT/$ITEM/crypt_salt")")
 
 cid=$(field client_id)
 csecret=$(field client_secret)
-{
+conf() {
   printf '[gdrive]\ntype = drive\nscope = drive.file\ntoken = %s\n' "$token"
   [ -z "$cid" ] || printf 'client_id = %s\nclient_secret = %s\n' "$cid" "$csecret"
   printf '\n[offsite]\ntype = crypt\nremote = gdrive:homelab-offsite\npassword = %s\npassword2 = %s\n' "$pass" "$salt"
-} |
-  "${SSH[@]}" 'sudo install -d -m 700 /root/.config/rclone &&
+}
+for host in "${HOSTS[@]}"; do
+  conf | ssh_to "$host" 'sudo install -d -m 700 /root/.config/rclone &&
     sudo sh -c "umask 077; cat > /root/.config/rclone/rclone.conf"'
+  echo "rclone config written on $host"
+done
 unset token pass salt cid csecret
-echo "rclone config written on prdsrv2. Test copy:"
-"${SSH[@]}" 'sudo rclone mkdir offsite:daily && sudo /opt/docker/backups/offsite.sh'
+echo "Test copy from prdsrv2:"
+ssh_to "${HOSTS[0]}" 'sudo rclone mkdir offsite:daily && sudo /opt/docker/backups/offsite.sh'
