@@ -13,7 +13,7 @@ what runs. The VM itself (and the Proxmox hosts) are built by
 | `paperless` | Paperless-ngx with Redis, Tika and Gotenberg | `paperless.` |
 | `n8n` | Automation | `n8n.` |
 | `metabase` | Reporting | `metabase.` |
-| `uptime-kuma` | Uptime monitoring | `uptime.` |
+| `uptime-kuma` | Uptime monitoring (runs on prdsrv3, see below) | `uptime.` |
 | `dozzle` | Live logs of every container (login `turbx`) | `logs.` |
 | `property-search` | Rightmove scraper job, run by n8n via `run.sh` (not a service); a log file per run in `logs/` | none |
 | `arcane` | Docker web UI (edits the files in this repo on the server) | `arcane.` |

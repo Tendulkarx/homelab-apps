@@ -13,8 +13,9 @@
 	}
 
 	@uptime host uptime.{$CADDY_BASE_DOMAIN}
+	# On prdsrv3 (infra container on prx2), so it can report prdsrv2 down
 	handle @uptime {
-		reverse_proxy uptime-kuma:3001
+		reverse_proxy 10.69.20.115:3001
 	}
 
 	@metabase host metabase.{$CADDY_BASE_DOMAIN}
