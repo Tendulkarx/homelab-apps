@@ -11,8 +11,13 @@ services:
     env_file: .env
     environment:
       - TZ=Europe/London
-      - DOCKER_HOSTNAMES=docker-socket-proxy,10.69.20.114,10.69.20.115
+      # Names shown in the container widget's Host column: prdsrv1 is the proxy's alias on the
+      # proxy network (docker-socket-proxy PROXY_ALIAS), the others map to their addresses.
+      - DOCKER_HOSTNAMES=prdsrv1,prdsrv2,prdsrv3
       - DOCKER_PORTS=2375,2375,2375
+    extra_hosts:
+      - "prdsrv2:10.69.20.114"
+      - "prdsrv3:10.69.20.115"
     volumes:
       - ./data:/appdata
     networks:

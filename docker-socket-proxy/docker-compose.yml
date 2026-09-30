@@ -22,7 +22,10 @@ services:
     ports:
       - "${PROXY_BIND:-127.0.0.1}:2375:2375"
     networks:
-      - proxy
+      proxy:
+        # PROXY_ALIAS=prdsrv1 in prdsrv1's .env: the name Homarr shows for this host's containers
+        aliases:
+          - ${PROXY_ALIAS:-docker-socket-proxy}
 
 networks:
   proxy:
