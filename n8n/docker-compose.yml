@@ -15,6 +15,11 @@ services:
       - N8N_PROTOCOL=https
     volumes:
       - ./data:/home/node/.n8n
+    # Until Caddy moves to this host (phase 6), Caddy on prdsrv2 reaches it over the LAN:
+    # PUBLISH_IP=10.69.20.113 in .env. Unset, it is published on localhost only.
+    # Its one job SSHes to prdsrv2 (10.69.20.114), where property-search stays beside Postgres.
+    ports:
+      - "${PUBLISH_IP:-127.0.0.1}:5678:5678"
     networks:
       - proxy
 
