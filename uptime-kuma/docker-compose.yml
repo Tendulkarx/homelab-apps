@@ -5,6 +5,10 @@ services:
     restart: unless-stopped
     volumes:
       - ./data:/app/data
+    # On prdsrv3 Caddy (on prdsrv2) reaches it over the LAN: UPTIME_KUMA_BIND=10.69.20.115 in
+    # .env. Unset, it is published on localhost only.
+    ports:
+      - "${UPTIME_KUMA_BIND:-127.0.0.1}:3001:3001"
     networks:
       - proxy
 networks:

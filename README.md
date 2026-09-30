@@ -25,6 +25,19 @@ Web addresses are `<name>.<CADDY_BASE_DOMAIN>`; Caddy also proxies the Proxmox h
 and `prx2.`. Every app shares the external Docker network `proxy`, so apps reach each other by
 container name (for example `postgres:5432`).
 
+## prdsrv3 (infra container on prx2)
+
+The same repo is also cloned at `/opt/docker` on **prdsrv3** (10.69.20.115), which runs only
+the infra that must keep working when prdsrv2 is down:
+
+| Folder | Its `.env` on prdsrv3 |
+|---|---|
+| `pihole` | second DNS server: `PIHOLE_BIND_IP=10.69.20.115` |
+| `nebula-sync` | copies block lists, groups, clients and local DNS records from the primary every hour |
+| `uptime-kuma` | `UPTIME_KUMA_BIND=10.69.20.115`; Caddy on prdsrv2 proxies `uptime.` to it |
+
+Every other folder runs on prdsrv2 only. See proxmox-lab `docs/lab-rebuild-plan.md`, phase 3.
+
 ## Making a change
 
 Edit on the Mac (`~/development/homelab-apps`) or on the server (directly or in Arcane), then

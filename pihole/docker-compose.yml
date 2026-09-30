@@ -11,9 +11,11 @@ services:
       - FTLCONF_ntp_sync_active=false
     volumes:
       - ./data/etc-pihole:/etc/pihole
+    # prdsrv2 (primary) answers on .114, prdsrv3 (second, kept in step by nebula-sync) on .115:
+    # PIHOLE_BIND_IP in that host's .env
     ports:
-      - "10.69.20.114:53:53/tcp"
-      - "10.69.20.114:53:53/udp"
+      - "${PIHOLE_BIND_IP:-10.69.20.114}:53:53/tcp"
+      - "${PIHOLE_BIND_IP:-10.69.20.114}:53:53/udp"
     cap_add:
       - NET_ADMIN
       - SYS_TIME
