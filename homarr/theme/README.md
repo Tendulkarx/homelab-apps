@@ -25,7 +25,7 @@ opacity, corner radius, `>_` logo from `logo.svg` as logo and favicon):
   updates (containers on all three hosts and a Releases list of everything homelab-apps pins),
   Documents & notes. Releases uses Docker Hub where a project publishes there; only Homarr and
   Arcane come from GitHub, as anonymous GitHub allows 60 requests an hour. It imports `homarr_session.py`, which signs in with the Homarr login
-  copied from 1Password (`Homelab - Homarr`) to `~/.homarr-setup/login.json` on prdsrv1;
+  copied from 1Password (`Homelab - Homarr`, vault **Private**) to `~/.homarr-setup/login.json` on prdsrv1;
   delete that file afterwards. The host history charts name their machines by Beszel system
   id (`HOST_HISTORY`), which changes if the Beszel hub is rebuilt from nothing.
 
