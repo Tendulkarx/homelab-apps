@@ -25,7 +25,7 @@
 
 	@paperless host paperless.{$CADDY_BASE_DOMAIN}
 	handle @paperless {
-    	reverse_proxy paperless-webserver:8000
+    	reverse_proxy 10.69.20.113:8000
 	}
 
 	@n8n host n8n.{$CADDY_BASE_DOMAIN}
