@@ -13,6 +13,8 @@ services:
       - N8N_HOST=n8n.example.com
       - N8N_PORT=5678
       - N8N_PROTOCOL=https
+      # Behind one proxy (Caddy): trust its X-Forwarded-For, which n8n otherwise rejects
+      - N8N_PROXY_HOPS=1
     volumes:
       - ./data:/home/node/.n8n
     # Until Caddy moves to this host (phase 6), Caddy on prdsrv2 reaches it over the LAN:
