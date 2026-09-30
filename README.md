@@ -9,6 +9,8 @@ below), so what is committed here is what runs. The hosts themselves are built b
 - **prdsrv2** (10.69.20.114): the databases, primary Pi-hole, property-search (beside Postgres).
 - **prdsrv3** (10.69.20.115, container on prx2): what must outlive prdsrv2.
 
+Each host checks out only its own folders (listed in `hosts/<host>`, see `hosts/README.md`).
+
 | Folder | Runs on | What it is | Address |
 |---|---|---|---|
 | `caddy` | prdsrv1 | Reverse proxy and HTTPS for everything below (custom build with the Cloudflare DNS module) | ports 80, 443 |
