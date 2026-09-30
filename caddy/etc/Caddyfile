@@ -38,6 +38,11 @@
 		reverse_proxy dozzle:8080
 	}
 
+	@dash host dash.{$CADDY_BASE_DOMAIN}
+	handle @dash {
+		reverse_proxy homarr:7575
+	}
+
 	@homepage host home.{$CADDY_BASE_DOMAIN}
 	handle @homepage {
 		reverse_proxy homepage:3000

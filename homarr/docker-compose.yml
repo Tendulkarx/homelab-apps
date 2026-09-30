@@ -1,0 +1,23 @@
+# Homarr: the dashboard at dash.<domain> (home.<domain> once Homepage is retired). Runs on prdsrv1.
+# Its boards, apps and integrations live in data/db/db.sqlite; integration secrets in there are
+# encrypted with SECRET_ENCRYPTION_KEY (.env; 1Password item prdsrv1-homarr), so both are needed
+# for a restore. Container lists come from the read-only socket proxies on all three hosts
+# (docker-socket-proxy), never from a full Docker socket.
+services:
+  homarr:
+    image: ghcr.io/homarr-labs/homarr:v1.77.2
+    container_name: homarr
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      - TZ=Europe/London
+      - DOCKER_HOSTNAMES=docker-socket-proxy,10.69.20.114,10.69.20.115
+      - DOCKER_PORTS=2375,2375,2375
+    volumes:
+      - ./data:/appdata
+    networks:
+      - proxy
+
+networks:
+  proxy:
+    external: true

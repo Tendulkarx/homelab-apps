@@ -1,0 +1,29 @@
+# Read-only Docker API for Homarr's container widgets: lists containers and their stats, and
+# refuses everything else (no start, stop, exec, images or POST of any kind). Runs on every host.
+# On prdsrv1 Homarr reaches it by name on the proxy network. On prdsrv2 and prdsrv3 it is published
+# on PROXY_BIND:2375 (.env) and Docker's DOCKER-USER rules (proxmox-lab role docker_firewall) admit
+# only prdsrv1.
+services:
+  docker-socket-proxy:
+    image: lscr.io/linuxserver/socket-proxy:3.4.6-r0-ls100
+    container_name: docker-socket-proxy
+    restart: unless-stopped
+    environment:
+      - CONTAINERS=1
+      - INFO=1
+      - PING=1
+      - VERSION=1
+      - POST=0
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    read_only: true
+    tmpfs:
+      - /run
+    ports:
+      - "${PROXY_BIND:-127.0.0.1}:2375:2375"
+    networks:
+      - proxy
+
+networks:
+  proxy:
+    external: true

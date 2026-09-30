@@ -6,3 +6,4 @@ property-search
 dozzle-agent
 backups
 hosts
+docker-socket-proxy

@@ -3,3 +3,4 @@ nebula-sync
 uptime-kuma
 dozzle-agent
 hosts
+docker-socket-proxy

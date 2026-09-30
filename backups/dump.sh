@@ -12,6 +12,8 @@
 #   n8n/                 its SQLite database (online copy) and config (holds the key for
 #                        stored credentials)
 #   paperless.tar.gz     document_exporter output: document_importer restores it
+#   homarr/db.sqlite     Homarr's boards, apps and integrations (online copy; its secrets need
+#                        SECRET_ENCRYPTION_KEY from 1Password prdsrv1-homarr)
 #
 # One part failing does not stop the others; the exit code is then 1 and the heartbeat is
 # not sent, so Uptime Kuma reports it. Passwords are read inside each container from its own
@@ -89,6 +91,18 @@ PY
   log "n8n $(du -sh "$OUT/n8n" | cut -f1)"
 }
 
+homarr() {
+  mkdir -p "$OUT/homarr"
+  python3 - "$OUT/homarr/db.sqlite" <<'PY' || return 1
+import sqlite3, sys
+src = sqlite3.connect("file:/opt/docker/homarr/data/db/db.sqlite?mode=ro", uri=True)
+dst = sqlite3.connect(sys.argv[1])
+src.backup(dst)
+dst.close()
+PY
+  log "homarr $(du -h "$OUT/homarr/db.sqlite" | cut -f1)"
+}
+
 paperless() {
   docker exec paperless-webserver document_exporter ../export --delete --no-progress-bar > /dev/null || return 1
   tar -C /opt/docker/paperless -czf "$OUT/paperless.tar.gz" export || return 1
@@ -97,7 +111,7 @@ paperless() {
 
 # part:container that must be running on this host for the part to apply
 ran=0
-for pc in postgres:postgres sqlserver:sqlserver oracle:oracle n8n:n8n paperless:paperless-webserver; do
+for pc in postgres:postgres sqlserver:sqlserver oracle:oracle n8n:n8n paperless:paperless-webserver homarr:homarr; do
   here "${pc#*:}" || continue
   ran=$((ran + 1))
   "${pc%%:*}" || fail "${pc%%:*}"
