@@ -38,14 +38,10 @@
 		reverse_proxy dozzle:8080
 	}
 
-	@dash host dash.{$CADDY_BASE_DOMAIN}
+	# Homarr, the dashboard (home. since Homepage was retired 2026-09-30; dash. kept)
+	@dash host home.{$CADDY_BASE_DOMAIN} dash.{$CADDY_BASE_DOMAIN}
 	handle @dash {
 		reverse_proxy homarr:7575
-	}
-
-	@homepage host home.{$CADDY_BASE_DOMAIN}
-	handle @homepage {
-		reverse_proxy homepage:3000
 	}
 
 	# Pi-hole's page is on prdsrv2, published for this Caddy on 10.69.20.114:8081
