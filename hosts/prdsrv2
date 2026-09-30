@@ -7,3 +7,4 @@ dozzle-agent
 backups
 hosts
 docker-socket-proxy
+beszel-agent

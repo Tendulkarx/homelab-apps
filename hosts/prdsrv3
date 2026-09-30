@@ -4,3 +4,5 @@ uptime-kuma
 dozzle-agent
 hosts
 docker-socket-proxy
+beszel-agent
+beszel

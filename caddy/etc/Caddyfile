@@ -50,6 +50,12 @@
 		reverse_proxy 10.69.20.114:8081
 	}
 
+	# Beszel hub (prdsrv3): the page, and the agents' WebSocket
+	@beszel host beszel.{$CADDY_BASE_DOMAIN}
+	handle @beszel {
+		reverse_proxy 10.69.20.115:8090
+	}
+
 	# Second Pi-hole (prdsrv3), kept in step by nebula-sync
 	@pihole2 host pihole2.{$CADDY_BASE_DOMAIN}
 	handle @pihole2 {

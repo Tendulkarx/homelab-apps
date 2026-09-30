@@ -1,0 +1,23 @@
+# Beszel agent: sends this host's CPU, memory, disk, network and container stats to the hub
+# (beszel/ on prdsrv3). It connects out over WebSocket and listens on no port (DISABLE_SSH).
+# Containers are read through docker-socket-proxy (read-only), not the Docker socket.
+# Runs on prdsrv1, prdsrv2 and prdsrv3; the Proxmox hosts run it as a service (proxmox-lab role
+# beszel_agent). About 10 MB of memory.
+services:
+  beszel-agent:
+    image: henrygd/beszel-agent:0.20.0
+    container_name: beszel-agent
+    restart: unless-stopped
+    # Host network: the host's own interfaces and traffic, not the container's
+    network_mode: host
+    mem_limit: 128m
+    environment:
+      - HUB_URL=https://beszel.example.com
+      - TOKEN=${BESZEL_TOKEN:?set in .env}
+      - KEY=${BESZEL_KEY:?set in .env}
+      - SYSTEM_NAME=${SYSTEM_NAME:?set in .env}
+      - DOCKER_HOST=${DOCKER_HOST:?set in .env}
+      - DISABLE_SSH=true
+    volumes:
+      # The agent's fingerprint: the hub accepts this token only from the machine it registered on
+      - ./data:/var/lib/beszel-agent

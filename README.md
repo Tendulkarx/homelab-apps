@@ -19,7 +19,8 @@ Each host checks out only its own folders (listed in `hosts/<host>`, see `hosts/
 | `metabase` | prdsrv1 | Reporting | `metabase.` |
 | `dozzle` | prdsrv1 | Live logs of every container on all three hosts (login `turbx`) | `logs.` |
 | `homarr` | prdsrv1 | Dashboard: every app, host, VM, container, DNS and monitor on one page (replaced Homepage 2026-09-30) | `home.`, `dash.` |
-| `docker-socket-proxy` | all three | Read-only Docker API for Homarr (lists containers, refuses everything else) | port 2375, prdsrv1 only |
+| `docker-socket-proxy` | all three | Read-only Docker API for Homarr and the Beszel agents (lists containers, refuses everything else) | port 2375, prdsrv1 only |
+| `beszel-agent` | all three | Sends the host's CPU, memory, disk, network and container stats to the Beszel hub; connects out, listens on no port | none |
 | `arcane` | prdsrv1 | Docker web UI (edits the files in this repo on the server). Lists every folder: start only this host's | `arcane.` |
 | `postgres` | prdsrv2 | PostgreSQL 18 (Paperless, Metabase and own databases) | 10.69.20.114:5432 |
 | `sqlserver` | prdsrv2 | SQL Server 2022 | 10.69.20.114:1433 |
@@ -28,6 +29,7 @@ Each host checks out only its own folders (listed in `hosts/<host>`, see `hosts/
 | `property-search` | prdsrv2 | Rightmove scraper job, run by n8n via `run.sh` (not a service); a log file per run in `logs/` | none |
 | `dozzle-agent` | prdsrv2, prdsrv3 | Lets Dozzle read this host's logs (the lab's own certificate) | port 7007 |
 | `uptime-kuma` | prdsrv3 | Uptime monitoring | `uptime.` |
+| `beszel` | prdsrv3 | Beszel hub: resource history and alerts for the VMs, prdsrv3 and both Proxmox hosts | `beszel.` |
 | `nebula-sync` | prdsrv3 | Copies lists and local DNS from the primary Pi-hole every hour | none |
 | `backups` | prdsrv1, prdsrv2 | Nightly dumps of what runs on the host into `/opt/backups` (01:30, 14 days), encrypted off-site copy (03:00); timers from proxmox-lab | none |
 
