@@ -20,6 +20,7 @@ what runs. The VM itself (and the Proxmox hosts) are built by
 | `postgres` | PostgreSQL 18 (Paperless, Metabase and own databases) | 10.69.20.114:5432 |
 | `sqlserver` | SQL Server 2022 | 10.69.20.114:1433 |
 | `oracle` | Oracle Database Free | 10.69.20.114:1521 |
+| `backups` | Nightly dumps of every database, n8n and Paperless into `/opt/backups` (01:30, 14 days); timer from proxmox-lab | none |
 
 Web addresses are `<name>.<CADDY_BASE_DOMAIN>`; Caddy also proxies the Proxmox hosts as `prx1.`
 and `prx2.`. Every app shares the external Docker network `proxy`, so apps reach each other by
