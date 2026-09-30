@@ -20,7 +20,7 @@
 
 	@metabase host metabase.{$CADDY_BASE_DOMAIN}
 	handle @metabase {
-    	reverse_proxy metabase:3000
+    	reverse_proxy 10.69.20.113:3030
 	}
 
 	@paperless host paperless.{$CADDY_BASE_DOMAIN}
