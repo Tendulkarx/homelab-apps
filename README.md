@@ -14,12 +14,11 @@ Each host checks out only its own folders (listed in `hosts/<host>`, see `hosts/
 | Folder | Runs on | What it is | Address |
 |---|---|---|---|
 | `caddy` | prdsrv1 | Reverse proxy and HTTPS for everything below (custom build with the Cloudflare DNS module) | ports 80, 443 |
-| `homepage` | prdsrv1 | Dashboard | `home.` |
 | `paperless` | prdsrv1 | Paperless-ngx with Redis, Tika and Gotenberg | `paperless.` |
 | `n8n` | prdsrv1 | Automation; starts property-search on prdsrv2 over SSH | `n8n.` |
 | `metabase` | prdsrv1 | Reporting | `metabase.` |
 | `dozzle` | prdsrv1 | Live logs of every container on all three hosts (login `turbx`) | `logs.` |
-| `homarr` | prdsrv1 | Dashboard: every app, host, VM, container, DNS and monitor on one page | `dash.` (becomes `home.`) |
+| `homarr` | prdsrv1 | Dashboard: every app, host, VM, container, DNS and monitor on one page (replaced Homepage 2026-09-30) | `home.`, `dash.` |
 | `docker-socket-proxy` | all three | Read-only Docker API for Homarr (lists containers, refuses everything else) | port 2375, prdsrv1 only |
 | `arcane` | prdsrv1 | Docker web UI (edits the files in this repo on the server). Lists every folder: start only this host's | `arcane.` |
 | `postgres` | prdsrv2 | PostgreSQL 18 (Paperless, Metabase and own databases) | 10.69.20.114:5432 |

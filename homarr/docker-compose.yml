@@ -1,4 +1,4 @@
-# Homarr: the dashboard at dash.<domain> (home.<domain> once Homepage is retired). Runs on prdsrv1.
+# Homarr: the dashboard at home.<domain> (and dash.<domain>); replaced Homepage 2026-09-30. Runs on prdsrv1.
 # Its boards, apps and integrations live in data/db/db.sqlite; integration secrets in there are
 # encrypted with SECRET_ENCRYPTION_KEY (.env; 1Password item prdsrv1-homarr), so both are needed
 # for a restore. Container lists come from the read-only socket proxies on all three hosts

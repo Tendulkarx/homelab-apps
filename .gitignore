@@ -7,7 +7,6 @@ caddy/init/
 # App data, certificates and runtime state: covered by the VM backups and database dumps
 */data/
 caddy/config/
-homepage/config/logs/
 property-search/logs/
 paperless/consume/
 paperless/export/
