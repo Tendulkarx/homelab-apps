@@ -9,7 +9,9 @@ services:
       - "443:443"
       - "443:443/udp"
     volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      # The folder, not the file: git pull replaces the file, which a file mount never sees.
+      # After a pull: docker exec caddy caddy reload --config /etc/caddy/Caddyfile
+      - ./etc:/etc/caddy:ro
       - ./data:/data
       - ./config:/config
     networks:

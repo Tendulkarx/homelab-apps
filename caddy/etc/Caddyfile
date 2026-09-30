@@ -45,7 +45,7 @@
 
 	@pihole host pihole.{$CADDY_BASE_DOMAIN}
 	handle @pihole {
-		reverse_proxy pihole:80
+		reverse_proxy 10.69.20.114:8081
 	}
 
 	@prx1 host prx1.{$CADDY_BASE_DOMAIN}

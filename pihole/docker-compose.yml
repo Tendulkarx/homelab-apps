@@ -16,6 +16,8 @@ services:
     ports:
       - "${PIHOLE_BIND_IP:-10.69.20.114}:53:53/tcp"
       - "${PIHOLE_BIND_IP:-10.69.20.114}:53:53/udp"
+      # Web page for Caddy on prdsrv1: PIHOLE_WEB_BIND=10.69.20.114 on prdsrv2 (localhost if unset)
+      - "${PIHOLE_WEB_BIND:-127.0.0.1}:8081:80"
     cap_add:
       - NET_ADMIN
       - SYS_TIME
