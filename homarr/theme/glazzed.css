@@ -113,11 +113,10 @@ body {
    (Proxmox panels show the host, the container table has a Host column). */
 .grid-stack-item > .mantine-Badge-root { display: none !important; }
 
-/* ---- Insets: boxes inside widgets (stat tiles, Pi-hole summary, node lists, controls) ------ */
+/* ---- Insets: boxes inside widgets (stat tiles, Pi-hole summary, node lists) --------------- */
 [class*="__statTile"],
 .summary-card,
-.mantine-Accordion-item,
-.dns-hole-controls-integration-item-outer-shell {
+.mantine-Accordion-item {
   background: var(--gz-inset) !important;
   border: 1px solid var(--gz-line) !important;
   border-radius: var(--gz-r) !important;
@@ -125,9 +124,20 @@ body {
 }
 .mantine-Accordion-item { overflow: hidden; margin-bottom: 6px; }
 .mantine-Accordion-control, .mantine-Accordion-panel { background: transparent !important; }
-.mantine-Accordion-control:hover, [class*="__statTile"]:hover, .summary-card:hover {
+.mantine-Accordion-control:hover, [class*="__statTile"]:hover {
   background: var(--gz-inset-hover) !important;
 }
+
+/* Pi-hole summary: a faint wash of Pi-hole's own box colours (admin page: bg-red, bg-yellow,
+   bg-aqua, bg-green), in Homarr's order: blocked, percentage, queries, domains on blocklist.
+   Red and amber are a touch stronger, as the background mutes them. */
+.summary-card { --ph: 255, 255, 255; }
+.summary-card:nth-child(1) { --ph: 221, 75, 57; --ph-a: 0.17; }
+.summary-card:nth-child(2) { --ph: 243, 156, 18; --ph-a: 0.15; }
+.summary-card:nth-child(3) { --ph: 0, 192, 239; }
+.summary-card:nth-child(4) { --ph: 0, 166, 90; }
+.summary-card { background: rgba(var(--ph), var(--ph-a, 0.12)) !important; border-color: rgba(var(--ph), 0.24) !important; }
+.summary-card:hover { background: rgba(var(--ph), 0.20) !important; }
 
 /* Neutral badges (counts such as 1 / 1): glass, rounded */
 .mantine-Accordion-control .mantine-Badge-root,
@@ -137,13 +147,8 @@ body {
 }
 .mantine-Badge-root { border-radius: 4px !important; }
 
-/* Buttons: rounded; neutral ones in glass (coloured ones keep their tint) */
+/* Buttons: rounded */
 .mantine-Button-root, .mantine-ActionIcon-root { border-radius: var(--gz-r-sm) !important; }
-.dns-hole-controls-enable-all-button,
-.dns-hole-controls-item-toggle-button-styling {
-  background: var(--gz-inset) !important;
-  border: 1px solid var(--gz-line) !important;
-}
 
 /* ---- Tables (containers, node lists) -------------------------------------------------------- */
 .mantine-Table-table, .mantine-Table-thead, .mantine-Table-tbody, .mantine-Table-tr, .mantine-Table-td,

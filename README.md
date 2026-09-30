@@ -24,7 +24,7 @@ Each host checks out only its own folders (listed in `hosts/<host>`, see `hosts/
 | `postgres` | prdsrv2 | PostgreSQL 18 (Paperless, Metabase and own databases) | 10.69.20.114:5432 |
 | `sqlserver` | prdsrv2 | SQL Server 2022 | 10.69.20.114:1433 |
 | `oracle` | prdsrv2 | Oracle Database Free | 10.69.20.114:1521 |
-| `pihole` | prdsrv2, prdsrv3 | DNS for the lab (primary; second on prdsrv3) | .114 and .115 port 53, `pihole.` |
+| `pihole` | prdsrv2, prdsrv3 | DNS for the lab (primary; second on prdsrv3) | .114 and .115 port 53; admin pages `pihole.` and `pihole2.` |
 | `property-search` | prdsrv2 | Rightmove scraper job, run by n8n via `run.sh` (not a service); a log file per run in `logs/` | none |
 | `dozzle-agent` | prdsrv2, prdsrv3 | Lets Dozzle read this host's logs (the lab's own certificate) | port 7007 |
 | `uptime-kuma` | prdsrv3 | Uptime monitoring | `uptime.` |

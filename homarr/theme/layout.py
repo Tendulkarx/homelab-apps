@@ -21,17 +21,24 @@ def nid():
     return "".join(random.choices(string.ascii_lowercase + string.digits, k=24))
 
 
-# A GitHub tile completes the Monitoring & network row
+ICON = "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/{}.svg"
+# Tiles added after build-board.py: (name, description, icon, href, ping url)
+EXTRA_APPS = [
+    ("Pi-hole 2", "DNS and ad blocking (second, prdsrv3)", "pi-hole",
+     "https://pihole2.example.com/admin", "https://pihole2.example.com/admin"),
+    ("Off-site backups", "Encrypted nightly copies in Google Drive (03:00)", "google-drive",
+     "https://drive.google.com/drive/search?q=homelab-offsite", None),
+]
 apps = {a["name"]: a["id"] for a in query("app.all")}
-if "GitHub" not in apps:
-    mutate("app.create", {"name": "GitHub", "description": "proxmox-lab, homelab-apps, property-search",
-                          "iconUrl": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/github.svg",
-                          "href": "https://github.com/Tendulkarx?tab=repositories", "pingUrl": None})
-    apps = {a["name"]: a["id"] for a in query("app.all")}
+for name, desc, icon, href, ping in EXTRA_APPS:
+    if name not in apps:
+        mutate("app.create", {"name": name, "description": desc, "iconUrl": ICON.format(icon),
+                              "href": href, "pingUrl": ping})
+apps = {a["name"]: a["id"] for a in query("app.all")}
 app_name = {v: k for k, v in apps.items()}
 
 # Headed groups: (title, 20 characters at most; y; height), full width in the plain section
-GROUPS = [("Apps", 2, 1), ("Monitoring & network", 3, 1), ("Servers", 4, 6), ("Containers & docs", 10, 6)]
+GROUPS = [("Apps", 2, 1), ("Monitoring & network", 3, 1), ("Servers", 4, 5), ("Containers & docs", 9, 6)]
 old_dyn = {s["options"]["title"]: s["id"] for s in b["sections"] if s["kind"] == "dynamic"}
 dyn = {title: old_dyn.get(title) or nid() for title, *_ in GROUPS}
 sections = [{"id": top, "kind": "empty", "xOffset": 0, "yOffset": 0}] + [
@@ -39,15 +46,19 @@ sections = [{"id": top, "kind": "empty", "xOffset": 0, "yOffset": 0}] + [
      "layouts": [{"layoutId": L, "parentSectionId": top, "xOffset": 0, "yOffset": y, "width": 12, "height": h}]}
     for t, y, h in GROUPS]
 
+# Each group is one balanced row: four wide tiles, or six narrow ones
 TILES = {
-    "Apps": ["Paperless", "n8n", "Metabase", "House Hunting", "Logs", "Arcane"],
-    "Monitoring & network": ["Uptime Kuma", "Status page", "Pi-hole", "UniFi", "Cloudflare", "GitHub"],
+    "Apps": ["Paperless", "n8n", "Metabase", "House Hunting"],
+    "Monitoring & network": ["Uptime Kuma", "Status page", "Pi-hole", "Pi-hole 2", "UniFi", "Cloudflare"],
 }
-SERVER_TILES = ["prx1", "prx2", "Backup Server"]
+SERVER_TILES = ["prx1", "prx2", "Backup Server", "Off-site backups", "Arcane", "Logs"]
 
-items = b["items"]
-if not any(i["kind"] == "app" and app_name.get(i["options"].get("appId")) == "GitHub" for i in items):
-    items.append({"id": nid(), "kind": "app", "options": {"appId": apps["GitHub"]}, "integrationIds": [],
+# Placed nowhere, so dropped from the board (the apps themselves are kept)
+items = [i for i in b["items"] if i["kind"] != "dnsHoleControls"
+         and not (i["kind"] == "app" and app_name.get(i["options"].get("appId")) == "GitHub")]
+have = {app_name.get(i["options"].get("appId")) for i in items if i["kind"] == "app"}
+for name in (n for n, *_ in EXTRA_APPS if n not in have):
+    items.append({"id": nid(), "kind": "app", "options": {"appId": apps[name]}, "integrationIds": [],
                   "advancedOptions": {"title": None, "customCssClasses": [], "borderColor": ""}, "layouts": []})
 
 
@@ -64,7 +75,8 @@ for it in items:
                              descriptionDisplayMode="tooltip")
         for group, names in TILES.items():
             if name in names:
-                at(it, dyn[group], names.index(name) * 2, 0, 2, 1)
+                w = 12 // len(names)
+                at(it, dyn[group], names.index(name) * w, 0, w, 1)
         if name in SERVER_TILES:
             at(it, dyn["Servers"], SERVER_TILES.index(name) * 2, 4, 2, 1)
     elif k == "clock":
@@ -77,8 +89,6 @@ for it in items:
         at(it, top, 9, 0, 3, 2)
     elif k == "healthMonitoring":
         at(it, dyn["Servers"], 6 if ints["Proxmox prx2"] in it["integrationIds"] else 0, 0, 6, 4)
-    elif k == "dnsHoleControls":
-        at(it, dyn["Servers"], 6, 4, 6, 2)
     elif k == "dockerContainers":
         at(it, dyn["Containers & docs"], 0, 0, 8, 6)
     elif k == "paperlessNgx":

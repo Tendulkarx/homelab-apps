@@ -50,6 +50,12 @@
 		reverse_proxy 10.69.20.114:8081
 	}
 
+	# Second Pi-hole (prdsrv3), kept in step by nebula-sync
+	@pihole2 host pihole2.{$CADDY_BASE_DOMAIN}
+	handle @pihole2 {
+		reverse_proxy 10.69.20.115:8081
+	}
+
 	@prx1 host prx1.{$CADDY_BASE_DOMAIN}
 	handle @prx1 {
 		reverse_proxy https://10.69.20.130:8006 {
