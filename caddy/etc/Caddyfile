@@ -9,40 +9,41 @@
 
 	@arcane host arcane.{$CADDY_BASE_DOMAIN}
 	handle @arcane {
-		reverse_proxy 10.69.20.113:3552
+		reverse_proxy arcane:3552
 	}
 
 	@uptime host uptime.{$CADDY_BASE_DOMAIN}
-	# On prdsrv3 (infra container on prx2), so it can report prdsrv2 down
+	# Uptime Kuma is on prdsrv3 (infra container on prx2), so it can report prdsrv2 down
 	handle @uptime {
 		reverse_proxy 10.69.20.115:3001
 	}
 
 	@metabase host metabase.{$CADDY_BASE_DOMAIN}
 	handle @metabase {
-    	reverse_proxy 10.69.20.113:3030
+		reverse_proxy metabase:3000
 	}
 
 	@paperless host paperless.{$CADDY_BASE_DOMAIN}
 	handle @paperless {
-    	reverse_proxy 10.69.20.113:8000
+		reverse_proxy paperless-webserver:8000
 	}
 
 	@n8n host n8n.{$CADDY_BASE_DOMAIN}
 	handle @n8n {
-		reverse_proxy 10.69.20.113:5678
+		reverse_proxy n8n:5678
 	}
 
 	@logs host logs.{$CADDY_BASE_DOMAIN}
 	handle @logs {
-		reverse_proxy 10.69.20.113:8080
+		reverse_proxy dozzle:8080
 	}
 
 	@homepage host home.{$CADDY_BASE_DOMAIN}
 	handle @homepage {
-		reverse_proxy 10.69.20.113:3000
+		reverse_proxy homepage:3000
 	}
 
+	# Pi-hole's page is on prdsrv2, published for this Caddy on 10.69.20.114:8081
 	@pihole host pihole.{$CADDY_BASE_DOMAIN}
 	handle @pihole {
 		reverse_proxy 10.69.20.114:8081
