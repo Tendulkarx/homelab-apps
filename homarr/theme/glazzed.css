@@ -117,6 +117,43 @@ body {
   text-shadow: 0 1px 8px rgba(10, 16, 32, 0.45);
 }
 
+/* ---- Servers (Beszel): one card per machine ------------------------------------------------ */
+/* Beszel's grid widget draws every machine inside one widget and has no option to show a single
+   machine. Its own card goes clear, like a section frame, and each machine's card takes the panel
+   glass and hover of every other item, with the page's 20px gutter between them. Its built-in
+   hover was a grey wash, and the blue edge lit up the whole row at once. */
+.beszelSystemGrid-wrapper.grid-stack-item-content.mantine-Card-root,
+.beszelSystemGrid-wrapper.grid-stack-item-content.mantine-Card-root:hover {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+.beszelSystemGrid-wrapper [style*="grid-template-columns"] { gap: 20px !important; }
+.beszelSystemGrid-wrapper .mantine-Card-root {
+  background: var(--gz-panel) !important;
+  border: 1px solid var(--gz-line) !important;
+  border-radius: var(--gz-r-lg) !important;
+  backdrop-filter: blur(20px) saturate(125%);
+  -webkit-backdrop-filter: blur(20px) saturate(125%);
+  box-shadow: 0 10px 30px rgba(8, 12, 24, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.beszelSystemGrid-wrapper .mantine-Card-root:hover {
+  background: var(--gz-panel) !important;
+  border-color: rgba(45, 140, 240, 0.50) !important;
+  box-shadow: 0 12px 34px rgba(45, 140, 240, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.07) !important;
+}
+/* The machine's name: plain light text beside its status dot, not a grey pill */
+.beszelSystemGrid-wrapper .mantine-Card-root .mantine-Badge-root {
+  background: transparent !important;
+  border: 0 !important;
+  padding-left: 0 !important;
+  color: var(--gz-text) !important;
+  font-weight: 400 !important;
+}
+
 /* Widget titles: hidden. They overlapped content, and each widget already names itself
    (Proxmox panels show the host, the container table has a Host column). */
 .grid-stack-item > .mantine-Badge-root { display: none !important; }

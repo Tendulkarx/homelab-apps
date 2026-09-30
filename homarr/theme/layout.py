@@ -95,11 +95,13 @@ have = {app_name.get(i["options"].get("appId")) for i in items if i["kind"] == "
 for name in (n for n in ON_BOARD if n not in have):
     items.append({"id": nid(), "kind": "app", "options": {"appId": apps[name]}, "integrationIds": [],
                   "advancedOptions": {"title": None, "customCssClasses": [], "borderColor": ""}, "layouts": []})
-# One card per machine from Beszel (hub on prdsrv3): CPU, memory, disks, network, load, temperatures
+# One card per machine from Beszel (hub on prdsrv3): CPU, memory, disks, network, load, temperatures.
+# It is one widget; glazzed.css makes each machine a card of its own.
 SERVER_GRID = {"statusFilter": "all", "showCpu": True, "showMemory": True, "showDisk": True, "showGpu": False,
                "showLoadAvg": True, "showNet": True, "showTemp": False, "showBattery": False, "showServices": False,
                "showUptime": True, "showAgent": False}
-# Charts for the two physical hosts (Beszel system ids)
+# Charts for the two physical hosts (Beszel system ids). A hub rebuilt from nothing gives every
+# machine a new id: read them from beszel.example.com (a system's page address) and update these.
 HOST_HISTORY = {"prx1": "03hzcypegtkki1k", "prx2": "ovs2248dq83evvn"}
 
 

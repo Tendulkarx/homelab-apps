@@ -11,7 +11,9 @@ opacity, corner radius, `>_` logo from `logo.svg` as logo and favicon):
   Sections draw no frame: every item stands on its own like the top row, under a plain light
   header in the gap above (never overlapping); per-widget title badges are hidden. Section
   cards line up with the top row's columns (the section's inner grid is pulled out by one
-  gutter). Pi-hole's summary cards carry a faint wash of Pi-hole's own colours. Thin white
+  gutter). Pi-hole's summary cards carry a faint wash of Pi-hole's own colours. Beszel's
+  server widget is one item holding every machine: its own card is clear and each machine
+  gets the panel glass and blue hover, so they read as separate cards. Thin white
   Open Sans; blue `#2d8cf0`, green `#4cd964`. `glazzed.css`.
 - **bluematrix**: the Ghostty terminal's Blue Matrix palette (`#101116`, `#00b0ff`, `#00ff9c`),
   rounded glass cards over a faint grid, JetBrains Mono headings. `bluematrix.css`.
@@ -24,7 +26,13 @@ opacity, corner radius, `>_` logo from `logo.svg` as logo and favicon):
   Documents & notes. Releases uses Docker Hub where a project publishes there; only Homarr and
   Arcane come from GitHub, as anonymous GitHub allows 60 requests an hour. It imports `homarr_session.py`, which signs in with the Homarr login
   copied from 1Password (`Homelab - Homarr`) to `~/.homarr-setup/login.json` on prdsrv1;
-  delete that file afterwards.
+  delete that file afterwards. The host history charts name their machines by Beszel system
+  id (`HOST_HISTORY`), which changes if the Beszel hub is rebuilt from nothing.
+
+The Beszel integration (Management > Integrations) is not made by `build-board.py`: it was
+added by hand with Beszel's read-only `homarr` user (its password is in 1Password, vault
+Development). On a Homarr rebuilt from nothing, add it
+again, named `Beszel`, before running `layout.py`.
 
 Homarr quirk: a category is open when its per-user `collapsed` value is `true` (the component
 treats it as "opened"), so `section.changeCollapsed` with `collapsed: true` expands it.

@@ -44,7 +44,8 @@ container name (for example `postgres:5432`).
 
 A host's own values live in each folder's `.env` (not in git): `PIHOLE_BIND_IP` and
 `PIHOLE_WEB_BIND` (Pi-hole), `UPTIME_KUMA_BIND`, `DOZZLE_HOSTNAME`/`AGENT_BIND` (agents),
-`DOZZLE_REMOTE_AGENT` (Dozzle). See proxmox-lab `docs/lab-rebuild-plan.md`, phases 3 and 6.
+`DOZZLE_REMOTE_AGENT` (Dozzle), `SYSTEM_NAME` and `DOCKER_HOST` (Beszel agent), `HUB_BIND`
+(Beszel hub). See proxmox-lab `docs/lab-rebuild-plan.md`, phases 3 and 6.
 
 ## Making a change
 
@@ -115,6 +116,15 @@ hash of it in `dozzle/data/users.yml`, which is not committed; to rebuild that f
 op read op://Development/prdsrv2-dozzle/password | ssh prdsrv1 'cd /opt/docker/dozzle && mkdir -p data &&
   docker run --rm amir20/dozzle:v11.1.2 generate turbx --password "$(cat)" > data/users.yml'
 ```
+
+Beszel agents register once, then the hub knows each by the fingerprint in its `data/`
+folder (the Proxmox hosts: `/var/lib/beszel-agent`). The hub's universal token is kept off, so
+a rebuilt machine, or a new one, is refused until it registers again: in the hub, Settings >
+Tokens & Fingerprints, switch the universal token on for an hour, start the agent, switch it
+off. A hub rebuilt from nothing (no `beszel/data`) also has a new key: copy its public key and
+token into `Homelab - Beszel` (section `agents`), rebuild each agent's `.env`, run `make hosts
+ARGS="--tags beszel"` in proxmox-lab for prx1 and prx2, and update the system ids in
+`homarr/theme/layout.py`.
 
 `postgres/init/02-users.sql` is not committed either (it contains passwords); its original
 values are in `prdsrv2-postgres`.
