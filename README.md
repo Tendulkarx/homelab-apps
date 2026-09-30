@@ -1,43 +1,45 @@
 # homelab-apps
 
-The Docker apps on **prdsrv2** (10.69.20.114): one folder per app, each with its
-`docker-compose.yml`. On the server this repo *is* `/opt/docker`, so what is committed here is
-what runs. The VM itself (and the Proxmox hosts) are built by
+The Docker apps of the homelab, one folder per app, each with its `docker-compose.yml`. The same
+repo is cloned at `/opt/docker` on three hosts, and each host runs only its own folders (table
+below), so what is committed here is what runs. The hosts themselves are built by
 [proxmox-lab](https://github.com/Tendulkarx/proxmox-lab).
 
-| Folder | What it is | Address |
-|---|---|---|
-| `caddy` | Reverse proxy and HTTPS for everything below (custom build with the Cloudflare DNS module) | ports 80, 443 |
-| `pihole` | DNS for the lab | 10.69.20.114:53, `pihole.` |
-| `homepage` | Dashboard | `home.` |
-| `paperless` | Paperless-ngx with Redis, Tika and Gotenberg | `paperless.` |
-| `n8n` | Automation | `n8n.` |
-| `metabase` | Reporting | `metabase.` |
-| `uptime-kuma` | Uptime monitoring (runs on prdsrv3, see below) | `uptime.` |
-| `dozzle` | Live logs of every container (login `turbx`) | `logs.` |
-| `property-search` | Rightmove scraper job, run by n8n via `run.sh` (not a service); a log file per run in `logs/` | none |
-| `arcane` | Docker web UI (edits the files in this repo on the server) | `arcane.` |
-| `postgres` | PostgreSQL 18 (Paperless, Metabase and own databases) | 10.69.20.114:5432 |
-| `sqlserver` | SQL Server 2022 | 10.69.20.114:1433 |
-| `oracle` | Oracle Database Free | 10.69.20.114:1521 |
-| `backups` | Nightly dumps of every database, n8n and Paperless into `/opt/backups` (01:30, 14 days); timer from proxmox-lab | none |
+- **prdsrv1** (10.69.20.113): the apps and Caddy.
+- **prdsrv2** (10.69.20.114): the databases, primary Pi-hole, property-search (beside Postgres).
+- **prdsrv3** (10.69.20.115, container on prx2): what must outlive prdsrv2.
+
+| Folder | Runs on | What it is | Address |
+|---|---|---|---|
+| `caddy` | prdsrv1 | Reverse proxy and HTTPS for everything below (custom build with the Cloudflare DNS module) | ports 80, 443 |
+| `homepage` | prdsrv1 | Dashboard | `home.` |
+| `paperless` | prdsrv1 | Paperless-ngx with Redis, Tika and Gotenberg | `paperless.` |
+| `n8n` | prdsrv1 | Automation; starts property-search on prdsrv2 over SSH | `n8n.` |
+| `metabase` | prdsrv1 | Reporting | `metabase.` |
+| `dozzle` | prdsrv1 | Live logs of every container on all three hosts (login `turbx`) | `logs.` |
+| `arcane` | prdsrv1 | Docker web UI (edits the files in this repo on the server). Lists every folder: start only this host's | `arcane.` |
+| `postgres` | prdsrv2 | PostgreSQL 18 (Paperless, Metabase and own databases) | 10.69.20.114:5432 |
+| `sqlserver` | prdsrv2 | SQL Server 2022 | 10.69.20.114:1433 |
+| `oracle` | prdsrv2 | Oracle Database Free | 10.69.20.114:1521 |
+| `pihole` | prdsrv2, prdsrv3 | DNS for the lab (primary; second on prdsrv3) | .114 and .115 port 53, `pihole.` |
+| `property-search` | prdsrv2 | Rightmove scraper job, run by n8n via `run.sh` (not a service); a log file per run in `logs/` | none |
+| `dozzle-agent` | prdsrv2, prdsrv3 | Lets Dozzle read this host's logs (the lab's own certificate) | port 7007 |
+| `uptime-kuma` | prdsrv3 | Uptime monitoring | `uptime.` |
+| `nebula-sync` | prdsrv3 | Copies lists and local DNS from the primary Pi-hole every hour | none |
+| `backups` | prdsrv1, prdsrv2 | Nightly dumps of what runs on the host into `/opt/backups` (01:30, 14 days), encrypted off-site copy (03:00); timers from proxmox-lab | none |
+
+Apps on prdsrv1 still reach Postgres as `postgres`: their compose files map that name to
+10.69.20.114 (`extra_hosts`).
 
 Web addresses are `<name>.<CADDY_BASE_DOMAIN>`; Caddy also proxies the Proxmox hosts as `prx1.`
 and `prx2.`. Every app shares the external Docker network `proxy`, so apps reach each other by
 container name (for example `postgres:5432`).
 
-## prdsrv3 (infra container on prx2)
+## Per-host settings
 
-The same repo is also cloned at `/opt/docker` on **prdsrv3** (10.69.20.115), which runs only
-the infra that must keep working when prdsrv2 is down:
-
-| Folder | Its `.env` on prdsrv3 |
-|---|---|
-| `pihole` | second DNS server: `PIHOLE_BIND_IP=10.69.20.115` |
-| `nebula-sync` | copies block lists, groups, clients and local DNS records from the primary every hour |
-| `uptime-kuma` | `UPTIME_KUMA_BIND=10.69.20.115`; Caddy on prdsrv2 proxies `uptime.` to it |
-
-Every other folder runs on prdsrv2 only. See proxmox-lab `docs/lab-rebuild-plan.md`, phase 3.
+A host's own values live in each folder's `.env` (not in git): `PIHOLE_BIND_IP` and
+`PIHOLE_WEB_BIND` (Pi-hole), `UPTIME_KUMA_BIND`, `DOZZLE_HOSTNAME`/`AGENT_BIND` (agents),
+`DOZZLE_REMOTE_AGENT` (Dozzle). See proxmox-lab `docs/lab-rebuild-plan.md`, phases 3 and 6.
 
 ## Making a change
 
@@ -93,7 +95,8 @@ sure a fresh backup exists first.
 ## Secrets
 
 `.env` files are never committed. Their values are in 1Password (vault **Development**), one
-item per app named `prdsrv2-<app>`, one field per line of the file. Each `.env.example` lists
+item per app named `prdsrv2-<app>` (named before apps moved to prdsrv1; the names stay), one
+field per line of the file. Per-host values (see above) are added by hand. Each `.env.example` lists
 every setting with its 1Password reference, so a lost `.env` is rebuilt with:
 
 ```bash
@@ -104,7 +107,7 @@ Dozzle's login (user `turbx`) is the 1Password item `prdsrv2-dozzle`. The server
 hash of it in `dozzle/data/users.yml`, which is not committed; to rebuild that file, from the Mac:
 
 ```bash
-op read op://Development/prdsrv2-dozzle/password | ssh prdsrv2 'cd /opt/docker/dozzle && mkdir -p data &&
+op read op://Development/prdsrv2-dozzle/password | ssh prdsrv1 'cd /opt/docker/dozzle && mkdir -p data &&
   docker run --rm amir20/dozzle:v11.1.2 generate turbx --password "$(cat)" > data/users.yml'
 ```
 
@@ -114,6 +117,7 @@ values are in `prdsrv2-postgres`.
 ## What is not in git, and where it is kept
 
 App data (`*/data/`, Paperless `media`, `consume` and `export`), Caddy's certificates and
-runtime config, and logs are ignored. They are covered by the nightly Proxmox backup of prdsrv2
-(02:30, last two kept, copied to the second host at 06:00); see `docs/disaster-recovery.md` in
-proxmox-lab.
+runtime config, and logs are ignored. They are covered by the nightly Proxmox backups of each
+host (to the Backup Server on prx2, and to `data` with a copy on prx2), and the databases, n8n
+and Paperless also by `backups/` (nightly dumps plus an encrypted off-site copy); see
+`docs/disaster-recovery.md` in proxmox-lab.
