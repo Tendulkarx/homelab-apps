@@ -71,3 +71,19 @@ a:hover { color: var(--hl-green) !important; }
 }
 .ProseMirror h1, .ProseMirror h2, .ProseMirror h3 { color: var(--hl-blue) !important; }
 .ProseMirror b, .ProseMirror strong { color: var(--hl-green) !important; }
+
+/* Headed groups (dynamic sections, class hl-group): framed, never collapsible */
+.hl-group {
+  border: 1px solid rgba(0, 176, 255, 0.22) !important;
+  border-radius: 16px !important;
+  background: rgba(16, 20, 32, 0.35) !important;
+  backdrop-filter: blur(6px);
+}
+
+/* App tiles: one readable title size everywhere (a one-row group squeezes them otherwise) */
+.app-title {
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.01em;
+}
+.app-wrapper:hover .app-title { color: var(--hl-green) !important; }
