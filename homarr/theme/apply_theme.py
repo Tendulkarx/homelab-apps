@@ -6,7 +6,7 @@ import sys
 from homarr_session import login, mutate, query
 
 THEMES = {
-    "glazzed": {"css": "glazzed.css", "primaryColor": "#2d8cf0", "secondaryColor": "#4cd964", "opacity": 50, "itemRadius": "xs"},
+    "glazzed": {"css": "glazzed.css", "primaryColor": "#2d8cf0", "secondaryColor": "#4cd964", "opacity": 50, "itemRadius": "lg"},
     "bluematrix": {"css": "bluematrix.css", "primaryColor": "#00b0ff", "secondaryColor": "#00ff9c", "opacity": 55, "itemRadius": "lg"},
 }
 name = sys.argv[1] if len(sys.argv) > 1 else "glazzed"

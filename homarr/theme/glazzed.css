@@ -1,24 +1,34 @@
-/* Homelab board: "Glazzed" look (reference: the Glazzed admin theme). A soft blurred mesh of
-   slate blue, violet, crimson and teal; dark translucent glass panels with square corners and
-   hairline borders; thin white type (Open Sans Light); blue #2d8cf0 and green #4cd964 accents.
-   The previous Blue Matrix look is bluematrix.css. */
+/* Homelab board: "Glazzed" look (after the Glazzed admin theme), with rounded corners.
+   A soft blurred mesh of slate blue, violet, crimson and teal; translucent glass panels with
+   hairline borders; thin white Open Sans; blue #2d8cf0 and green #4cd964 accents.
+   Every surface uses one of three glass levels, so no widget keeps its own grey:
+     panel  (widget cards)          --gz-panel
+     inset  (boxes inside a widget) --gz-inset
+     group  (headed section frames) --gz-group
+   The previous look is bluematrix.css (apply_theme.py switches). */
 @import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600&display=swap');
 
 :root {
   --gz-blue: #2d8cf0;
+  --gz-violet: #8e6cf0;
   --gz-green: #4cd964;
-  --gz-red: #ff5a5f;
   --gz-text: #e9eef6;
-  --gz-muted: rgba(233, 238, 246, 0.6);
-  --gz-line: rgba(255, 255, 255, 0.08);
-  --gz-panel: rgba(24, 32, 52, 0.46);
-  --gz-strip: rgba(12, 18, 32, 0.28);
+  --gz-muted: rgba(233, 238, 246, 0.62);
+  --gz-line: rgba(255, 255, 255, 0.09);
+  --gz-line-strong: rgba(255, 255, 255, 0.16);
+  --gz-panel: rgba(24, 32, 52, 0.50);
+  --gz-inset: rgba(255, 255, 255, 0.055);
+  --gz-inset-hover: rgba(45, 140, 240, 0.14);
+  --gz-group: rgba(255, 255, 255, 0.025);
+  --gz-r-lg: 16px;
+  --gz-r: 12px;
+  --gz-r-sm: 9px;
   --mantine-color-body: #232c44;
   --mantine-font-family: 'Open Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
   --mantine-font-family-headings: 'Open Sans', system-ui, sans-serif;
 }
 
-/* Background: the blurred colour mesh, fixed while scrolling */
+/* ---- Background: blurred colour mesh, fixed while scrolling ---------------------------- */
 body {
   font-family: 'Open Sans', system-ui, sans-serif !important;
   color: var(--gz-text) !important;
@@ -33,47 +43,92 @@ body {
 }
 .mantine-AppShell-main { background: transparent !important; }
 
-/* Top bar: a dark strip with a hairline */
+/* ---- Top bar ------------------------------------------------------------------------------ */
 .mantine-AppShell-header {
-  background: rgba(22, 30, 48, 0.72) !important;
+  background: rgba(22, 30, 48, 0.70) !important;
   backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
   border-bottom: 1px solid var(--gz-line) !important;
 }
+.mantine-AppShell-header .mantine-TextInput-input,
+.mantine-AppShell-header input {
+  background: var(--gz-inset) !important;
+  border: 1px solid var(--gz-line) !important;
+  border-radius: 999px !important;
+  color: var(--gz-text) !important;
+}
 
-/* Panels: translucent glass, square corners, hairline border */
-.mantine-Card-root {
+/* ---- Panels: every widget card ------------------------------------------------------------ */
+.grid-stack-item-content.mantine-Card-root {
   background-color: var(--gz-panel) !important;
   border: 1px solid var(--gz-line) !important;
-  border-radius: 0 !important;
-  backdrop-filter: blur(20px) saturate(120%);
-  -webkit-backdrop-filter: blur(20px) saturate(120%);
-  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.04) inset !important;
-  transition: background-color 0.2s ease, border-color 0.2s ease;
+  border-radius: var(--gz-r-lg) !important;
+  backdrop-filter: blur(20px) saturate(125%);
+  -webkit-backdrop-filter: blur(20px) saturate(125%);
+  box-shadow: 0 10px 30px rgba(8, 12, 24, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
-.mantine-Card-root .mantine-Card-root { background-color: rgba(255, 255, 255, 0.03) !important; }
-.mantine-Card-root:hover { border-color: rgba(45, 140, 240, 0.45) !important; }
+.grid-stack-item-content.mantine-Card-root:hover {
+  border-color: rgba(45, 140, 240, 0.50) !important;
+  box-shadow: 0 12px 34px rgba(45, 140, 240, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.07) !important;
+}
 
-/* Headed groups: a panel whose title reads like Glazzed's header strip */
-.hl-group {
-  background: var(--gz-strip) !important;
+/* ---- Headed groups: a frame with a frosted header set into its top edge -------------------- */
+.hl-group.mantine-Card-root {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.07), var(--gz-group) 72px) !important;
   border: 1px solid var(--gz-line) !important;
-  border-radius: 0 !important;
+  border-radius: 20px !important;
+  box-shadow: none !important;
+  backdrop-filter: blur(6px);
 }
-.hl-group > .mantine-Badge-root,
-.grid-stack-item > .mantine-Badge-root {
-  background: rgba(20, 28, 46, 0.85) !important;
-  border: 1px solid var(--gz-line) !important;
-  border-radius: 0 !important;
-  color: var(--gz-text) !important;
+.hl-group.mantine-Card-root:hover { border-color: var(--gz-line-strong) !important; box-shadow: none !important; }
+.hl-group > .mantine-Badge-root {
+  top: -16px !important;
+  left: 18px !important;
   height: auto !important;
-  padding: 3px 12px !important;
+  padding: 6px 16px 6px 14px !important;
+  border-radius: 999px !important;
+  border: 1px solid var(--gz-line-strong) !important;
+  background: linear-gradient(90deg, rgba(45, 140, 240, 0.55), rgba(142, 108, 240, 0.40)) !important;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: 0 6px 18px rgba(10, 16, 32, 0.35) !important;
+  color: #fff !important;
+  z-index: 3;
 }
 .hl-group > .mantine-Badge-root .mantine-Badge-label {
   font-family: 'Open Sans', sans-serif !important;
-  font-weight: 300 !important;
-  font-size: 15px !important;
-  text-transform: none !important;
-  letter-spacing: 0.02em !important;
+  font-weight: 600 !important;
+  font-size: 13px !important;
+  letter-spacing: 0.08em !important;
+  text-transform: uppercase !important;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.hl-group > .mantine-Badge-root .mantine-Badge-label::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--gz-green);
+  box-shadow: 0 0 8px var(--gz-green);
+}
+
+/* Widget titles: a small glass pill set into the card's top edge, right-hand side (matches the
+   section headers, never covers the widget's content) */
+.grid-stack-item > .mantine-Badge-root {
+  left: auto !important;
+  right: 18px !important;
+  top: -10px !important;
+  z-index: 5 !important;
+  backdrop-filter: blur(12px);
+  height: auto !important;
+  padding: 3px 10px !important;
+  border-radius: 999px !important;
+  border: 1px solid var(--gz-line) !important;
+  background: rgba(20, 28, 46, 0.85) !important;
+  color: var(--gz-text) !important;
 }
 .grid-stack-item > .mantine-Badge-root .mantine-Badge-label {
   font-weight: 400 !important;
@@ -82,7 +137,53 @@ body {
   letter-spacing: 0.02em !important;
 }
 
-/* Type: thin and white, like the reference */
+/* ---- Insets: boxes inside widgets (stat tiles, Pi-hole summary, node lists, controls) ------ */
+[class*="__statTile"],
+.summary-card,
+.mantine-Accordion-item,
+.dns-hole-controls-integration-item-outer-shell {
+  background: var(--gz-inset) !important;
+  border: 1px solid var(--gz-line) !important;
+  border-radius: var(--gz-r) !important;
+  box-shadow: none !important;
+}
+.mantine-Accordion-item { overflow: hidden; margin-bottom: 6px; }
+.mantine-Accordion-control, .mantine-Accordion-panel { background: transparent !important; }
+.mantine-Accordion-control:hover, [class*="__statTile"]:hover, .summary-card:hover {
+  background: var(--gz-inset-hover) !important;
+}
+
+/* Neutral badges (counts such as 1 / 1): glass, rounded */
+.mantine-Accordion-control .mantine-Badge-root,
+.mantine-datatable-empty-state-icon {
+  background: rgba(255, 255, 255, 0.10) !important;
+  color: var(--gz-text) !important;
+}
+.mantine-Badge-root { border-radius: 999px !important; }
+
+/* Buttons: rounded; neutral ones in glass (coloured ones keep their tint) */
+.mantine-Button-root, .mantine-ActionIcon-root { border-radius: var(--gz-r-sm) !important; }
+.dns-hole-controls-enable-all-button,
+.dns-hole-controls-item-toggle-button-styling {
+  background: var(--gz-inset) !important;
+  border: 1px solid var(--gz-line) !important;
+}
+
+/* ---- Tables (containers, node lists) -------------------------------------------------------- */
+.mantine-Table-table, .mantine-Table-thead, .mantine-Table-tbody, .mantine-Table-tr, .mantine-Table-td,
+.mantine-datatable-loader {
+  background-color: transparent !important;
+  border-color: var(--gz-line) !important;
+}
+.mantine-Table-th {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+  border-color: var(--gz-line) !important;
+  backdrop-filter: blur(10px);
+}
+.mantine-Table-tbody .mantine-Table-tr:nth-of-type(odd) { background-color: rgba(255, 255, 255, 0.025) !important; }
+.mantine-Table-tbody .mantine-Table-tr:hover { background-color: var(--gz-inset-hover) !important; }
+
+/* ---- Type ---------------------------------------------------------------------------------- */
 h1, h2, h3, h4, .mantine-Title-root {
   font-family: 'Open Sans', sans-serif !important;
   font-weight: 300 !important;
@@ -92,48 +193,22 @@ h1, h2, h3, h4, .mantine-Title-root {
 .mantine-Text-root { font-family: 'Open Sans', sans-serif !important; }
 
 /* App tiles */
-.app-title {
-  font-size: 14px !important;
-  font-weight: 400 !important;
-  color: var(--gz-text) !important;
-}
+.app-title { font-size: 14px !important; font-weight: 400 !important; color: var(--gz-text) !important; }
 .app-wrapper:hover .app-title { color: var(--gz-blue) !important; }
 
-/* Notebook in the same style */
-.mantine-RichTextEditor-root, .mantine-RichTextEditor-content, .ProseMirror, .mantine-RichTextEditor-toolbar {
+/* ---- Notebook -------------------------------------------------------------------------------- */
+.mantine-RichTextEditor-root, .mantine-RichTextEditor-content, .ProseMirror,
+.mantine-RichTextEditor-toolbar, .mantine-RichTextEditor-controlsGroup, .mantine-RichTextEditor-control {
   background: transparent !important;
   color: var(--gz-text) !important;
   border-color: var(--gz-line) !important;
   font-weight: 300;
 }
+.mantine-RichTextEditor-control { border-radius: var(--gz-r-sm) !important; }
 .ProseMirror h1, .ProseMirror h2, .ProseMirror h3 { font-weight: 300 !important; color: #fff !important; }
 .ProseMirror b, .ProseMirror strong { color: var(--gz-blue) !important; font-weight: 600; }
 
-/* Links, focus, scrollbars */
+/* ---- Links, focus, scrollbars ------------------------------------------------------------------ */
 a:hover { color: var(--gz-blue) !important; }
 :focus-visible { outline-color: var(--gz-blue) !important; }
 * { scrollbar-width: thin; scrollbar-color: rgba(255, 255, 255, 0.25) transparent; }
-
-/* Inner boxes (Proxmox node bars, stat boxes, accordions): faint glass, not flat grey */
-.mantine-Card-root .mantine-Paper-root,
-.mantine-Accordion-item, .mantine-Accordion-control, .mantine-Accordion-panel {
-  background-color: rgba(255, 255, 255, 0.045) !important;
-  border-color: var(--gz-line) !important;
-  border-radius: 0 !important;
-}
-.mantine-Accordion-control:hover { background-color: rgba(45, 140, 240, 0.12) !important; }
-
-/* Tables: transparent rows, hairline separators, a whisper of striping */
-.mantine-Table-table, .mantine-Table-thead, .mantine-Table-tbody, .mantine-Table-tr, .mantine-Table-th, .mantine-Table-td {
-  background-color: transparent !important;
-  border-color: var(--gz-line) !important;
-}
-.mantine-Table-tbody .mantine-Table-tr:nth-of-type(odd) { background-color: rgba(255, 255, 255, 0.025) !important; }
-.mantine-Table-tbody .mantine-Table-tr:hover { background-color: rgba(45, 140, 240, 0.10) !important; }
-
-/* Group titles sit at the top left; widget titles move to the top right so they never overlap */
-.hl-group > .mantine-Badge-root { z-index: 3; }
-.grid-stack-item > .mantine-Badge-root {
-  left: auto !important;
-  right: 14px !important;
-}
