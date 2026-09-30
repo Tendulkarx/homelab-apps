@@ -85,7 +85,7 @@ body {
   -webkit-backdrop-filter: none !important;
 }
 .hl-group > .mantine-Badge-root {
-  top: -23px !important;
+  top: -14px !important;
   left: 4px !important;
   height: auto !important;
   padding: 0 !important;
@@ -101,8 +101,8 @@ body {
 .hl-group > .mantine-Badge-root .mantine-Badge-label {
   font-family: 'Open Sans', sans-serif !important;
   font-weight: 400 !important;
-  font-size: 15px !important;
-  line-height: 20px !important;
+  font-size: 14px !important;
+  line-height: 18px !important;
   letter-spacing: 0.02em !important;
   text-transform: none !important;
   color: rgba(255, 255, 255, 0.88) !important;
@@ -192,3 +192,14 @@ h1, h2, h3, h4, .mantine-Title-root {
 a:hover { color: var(--gz-blue) !important; }
 :focus-visible { outline-color: var(--gz-blue) !important; }
 * { scrollbar-width: thin; scrollbar-color: rgba(255, 255, 255, 0.25) transparent; }
+
+/* Tooltips and pop-ups (weather forecast, menus): the same glass as the cards */
+.mantine-HoverCard-dropdown, .mantine-Popover-dropdown, .mantine-Tooltip-tooltip, .mantine-Menu-dropdown {
+  background: rgba(24, 32, 52, 0.92) !important;
+  border: 1px solid var(--gz-line) !important;
+  border-radius: var(--gz-r) !important;
+  color: var(--gz-text) !important;
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  box-shadow: 0 12px 30px rgba(8, 12, 24, 0.40) !important;
+}
