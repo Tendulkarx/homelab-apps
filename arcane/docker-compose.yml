@@ -8,8 +8,8 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./data:/app/data
       - /opt/docker:/opt/docker
-    # Until Caddy moves to this host (phase 6), Caddy on prdsrv2 reaches it over the LAN:
-    # PUBLISH_IP=10.69.20.113 in .env. Unset, it is published on localhost only.
+    # Caddy reaches it over the proxy network (arcane:3552); published on localhost only.
+    # PUBLISH_IP in .env would publish it on the LAN (only needed while Caddy was on prdsrv2).
     ports:
       - "${PUBLISH_IP:-127.0.0.1}:3552:3552"
     networks:

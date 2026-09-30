@@ -21,7 +21,7 @@ Each host checks out only its own folders (listed in `hosts/<host>`, see `hosts/
 | `homarr` | prdsrv1 | Dashboard: every app, host, VM, container, DNS and monitor on one page (replaced Homepage 2026-09-30) | `home.`, `dash.` |
 | `docker-socket-proxy` | all three | Read-only Docker API for Homarr and the Beszel agents (lists containers, refuses everything else) | port 2375, prdsrv1 only |
 | `beszel-agent` | all three | Sends the host's CPU, memory, disk, network and container stats to the Beszel hub; connects out, listens on no port | none |
-| `arcane` | prdsrv1 | Docker web UI (edits the files in this repo on the server). Lists every folder: start only this host's | `arcane.` |
+| `arcane` | prdsrv1 | Docker web UI for prdsrv1's stacks (edits the files in this repo on the server); sees only this host's folders and containers | `arcane.` |
 | `postgres` | prdsrv2 | PostgreSQL 18 (Paperless, Metabase and own databases) | 10.69.20.114:5432 |
 | `sqlserver` | prdsrv2 | SQL Server 2022 | 10.69.20.114:1433 |
 | `oracle` | prdsrv2 | Oracle Database Free | 10.69.20.114:1521 |
@@ -63,6 +63,10 @@ ssh turbx@10.69.20.114
 cd /opt/docker && git pull
 cd paperless && docker compose up -d        # recreates only what changed
 ```
+
+When an app moves off prdsrv1, delete its project in Arcane afterwards (Destroy, with "remove
+files" and "remove volumes" both off): Arcane keeps a record of every folder it has seen, and a
+folder that has gone shows as a stopped project.
 
 Edited on the server or in Arcane instead: commit and push from `/opt/docker` (it has its own
 deploy key for this repo), then `git pull` on the Mac.
