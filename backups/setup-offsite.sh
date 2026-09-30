@@ -21,10 +21,12 @@ SSH=(ssh -i "$HOME/.ssh/id_ed25519_homelab" -o BatchMode=yes "$HOST")
 
 command -v rclone >/dev/null || brew install rclone
 
+valid_token() { printf '%s' "$1" | python3 -c 'import json,sys; assert "refresh_token" in json.load(sys.stdin)' 2>/dev/null; }
 field() { op read "op://$VAULT/$ITEM/$1" 2>/dev/null || true; }
 
 authorize() {
-  echo "A browser opens: sign in with the Google account for the backups and allow rclone."
+  # To stderr: stdout is the token, captured by the caller.
+  echo "A browser opens: sign in with the Google account for the backups and allow rclone." >&2
   # rclone takes and returns its settings as unpadded base64 JSON; the reply holds the token.
   opts=$(CID="${1:-}" CSECRET="${2:-}" python3 -c '
 import base64, json, os
@@ -40,7 +42,7 @@ print(json.loads(base64.b64decode(blob + "=" * (-len(blob) % 4)))["token"])'
 
 if ! op item get "$ITEM" --vault "$VAULT" >/dev/null 2>&1; then
   token=$(authorize)
-  [ -n "$token" ] || { echo "No token from rclone authorize"; exit 1; }
+  valid_token "$token" || { echo "No valid token from rclone authorize; nothing saved"; exit 1; }
   op item create --vault "$VAULT" --category password --title "$ITEM" \
     --tags homelab \
     "drive_token[concealed]=$token" \
@@ -51,7 +53,7 @@ if ! op item get "$ITEM" --vault "$VAULT" >/dev/null 2>&1; then
   echo "Saved to 1Password: $VAULT/$ITEM"
 elif [ "${1:-}" = "--reauth" ]; then
   token=$(authorize "$(field client_id)" "$(field client_secret)")
-  [ -n "$token" ] || { echo "No token from rclone authorize"; exit 1; }
+  valid_token "$token" || { echo "No valid token from rclone authorize; nothing saved"; exit 1; }
   op item edit "$ITEM" --vault "$VAULT" "drive_token[concealed]=$token" >/dev/null
   echo "New Drive token saved to 1Password: $VAULT/$ITEM"
 fi
