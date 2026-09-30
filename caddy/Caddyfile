@@ -30,7 +30,7 @@
 
 	@n8n host n8n.{$CADDY_BASE_DOMAIN}
 	handle @n8n {
-		reverse_proxy n8n:5678
+		reverse_proxy 10.69.20.113:5678
 	}
 
 	@logs host logs.{$CADDY_BASE_DOMAIN}
