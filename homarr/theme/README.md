@@ -18,10 +18,11 @@ opacity, corner radius, `>_` logo from `logo.svg` as logo and favicon):
 
 - `layout.py`: the whole layout. A top row (clock, weather, Uptime Kuma, Pi-hole), then headed
   groups that never collapse (Homarr "dynamic" sections). First every link, one balanced row
-  per group: Apps, Monitoring & network, Servers & backups. Then the live panels: Proxmox hosts
-  (one panel per host, no Nodes list), Containers & updates (containers on all three hosts and
-  a Releases list of everything homelab-apps pins), Documents & notes. Releases uses Docker Hub
-  where a project publishes there, as anonymous GitHub allows only 60 requests an hour. It imports `homarr_session.py`, which signs in with the Homarr login
+  per group: Apps, Monitoring & network, Infrastructure. Then the live panels: Servers (Beszel,
+  one card per machine), Host history (Beszel charts for prx1 and prx2, 24 hours), Containers &
+  updates (containers on all three hosts and a Releases list of everything homelab-apps pins),
+  Documents & notes. Releases uses Docker Hub where a project publishes there; only Homarr and
+  Arcane come from GitHub, as anonymous GitHub allows 60 requests an hour. It imports `homarr_session.py`, which signs in with the Homarr login
   copied from 1Password (`Homelab - Homarr`) to `~/.homarr-setup/login.json` on prdsrv1;
   delete that file afterwards.
 
