@@ -3,9 +3,8 @@
 
 One plain section holds everything. Headed groups are Homarr "dynamic" sections: titled frames
 that never collapse. Every service is an app tile in the same compact style (name left, icon
-right, description on hover). Also applies the CSS and logo in this folder.
+right, description on hover). The look is set separately by apply_theme.py.
 """
-import base64
 import random
 import string
 
@@ -92,7 +91,4 @@ for it in items:
 mutate("board.saveBoard", {"id": b["id"], "sections": sections, "items": items})
 print(f"layout saved: {len(GROUPS)} headed groups, {len(items)} items, no collapsible sections")
 
-logo = "data:image/svg+xml;base64," + base64.b64encode(open("logo.svg", "rb").read()).decode()
-mutate("board.savePartialBoardSettings", {"id": b["id"], "customCss": open("dashboard.css").read(),
-                                           "logoImageUrl": logo, "faviconImageUrl": logo, "opacity": 55})
-print("theme applied")
+print("layout done; set the look with apply_theme.py")
