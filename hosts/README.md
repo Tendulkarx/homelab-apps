@@ -2,7 +2,7 @@
 
 One file per host, one folder per line. Each host checks out only its own folders (git sparse
 checkout), so `/opt/docker` there, and Arcane on prdsrv1, show only what that host runs. Files
-at the top of the repo (README, this folder) are always there.
+at the top of the repo are always there; every list also names `hosts`, so this folder is too.
 
 After changing a list, on that host:
 
