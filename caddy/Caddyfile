@@ -9,7 +9,7 @@
 
 	@arcane host arcane.{$CADDY_BASE_DOMAIN}
 	handle @arcane {
-		reverse_proxy arcane:3552
+		reverse_proxy 10.69.20.113:3552
 	}
 
 	@uptime host uptime.{$CADDY_BASE_DOMAIN}
@@ -35,12 +35,12 @@
 
 	@logs host logs.{$CADDY_BASE_DOMAIN}
 	handle @logs {
-		reverse_proxy dozzle:8080
+		reverse_proxy 10.69.20.113:8080
 	}
 
 	@homepage host home.{$CADDY_BASE_DOMAIN}
 	handle @homepage {
-		reverse_proxy homepage:3000
+		reverse_proxy 10.69.20.113:3000
 	}
 
 	@pihole host pihole.{$CADDY_BASE_DOMAIN}
