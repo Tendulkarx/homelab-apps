@@ -84,6 +84,14 @@ body {
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
 }
+/* A section's inner grid pads its items by the same 10px gutter the page grid already adds, which
+   indented section cards 10px on each side. Pulling the inner grid out by one gutter puts their
+   edges on the same columns as the top row. */
+.hl-group .grid-stack {
+  margin-left: -10px !important;
+  margin-right: -10px !important;
+  width: auto !important;
+}
 .hl-group > .mantine-Badge-root {
   top: -14px !important;
   left: 4px !important;
@@ -116,6 +124,7 @@ body {
 /* ---- Insets: boxes inside widgets (stat tiles, Pi-hole summary, node lists) --------------- */
 [class*="__statTile"],
 .summary-card,
+.releases-repository-details,
 .mantine-Accordion-item {
   background: var(--gz-inset) !important;
   border: 1px solid var(--gz-line) !important;

@@ -37,8 +37,10 @@ for name, desc, icon, href, ping in EXTRA_APPS:
 apps = {a["name"]: a["id"] for a in query("app.all")}
 app_name = {v: k for k, v in apps.items()}
 
-# Headed groups: (title, 20 characters at most; y; height), full width in the plain section
-GROUPS = [("Apps", 2, 1), ("Monitoring & network", 3, 1), ("Servers", 4, 5), ("Containers & docs", 9, 6)]
+# Headed groups: (title, 20 characters at most; y; height), full width in the plain section.
+# Links first (apps, monitoring and network, servers), then the live panels below them.
+GROUPS = [("Apps", 2, 1), ("Monitoring & network", 3, 1), ("Servers & backups", 4, 1),
+          ("Proxmox hosts", 5, 4), ("Containers & updates", 9, 6), ("Documents & notes", 15, 3)]
 old_dyn = {s["options"]["title"]: s["id"] for s in b["sections"] if s["kind"] == "dynamic"}
 dyn = {title: old_dyn.get(title) or nid() for title, *_ in GROUPS}
 sections = [{"id": top, "kind": "empty", "xOffset": 0, "yOffset": 0}] + [
@@ -46,21 +48,54 @@ sections = [{"id": top, "kind": "empty", "xOffset": 0, "yOffset": 0}] + [
      "layouts": [{"layoutId": L, "parentSectionId": top, "xOffset": 0, "yOffset": y, "width": 12, "height": h}]}
     for t, y, h in GROUPS]
 
-# Each group is one balanced row: four wide tiles, or six narrow ones
+# Each link group is one balanced row: six narrow tiles, or four wide ones
 TILES = {
-    "Apps": ["Paperless", "n8n", "Metabase", "House Hunting"],
+    "Apps": ["Paperless", "n8n", "Metabase", "Logs", "Arcane", "GitHub"],
     "Monitoring & network": ["Uptime Kuma", "Status page", "Pi-hole", "Pi-hole 2", "UniFi", "Cloudflare"],
+    "Servers & backups": ["prx1", "prx2", "Backup Server", "Off-site backups"],
 }
-SERVER_TILES = ["prx1", "prx2", "Backup Server", "Off-site backups", "Arcane", "Logs"]
+ON_BOARD = {n for names in TILES.values() for n in names}
 
-# Placed nowhere, so dropped from the board (the apps themselves are kept)
+GH = "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/{}.png"
+
+
+def repo(name, provider, identifier, icon, prefix="", precision=3):
+    return {"id": name.lower().replace(" ", "-"), "provider": provider, "identifier": identifier, "name": name,
+            "iconUrl": GH.format(icon), "versionFilter": {"prefix": prefix, "precision": precision}}
+
+
+# Latest release of everything homelab-apps pins, to compare with the compose files. Docker Hub
+# wherever the project publishes there: anonymous GitHub allows 60 requests an hour, which two
+# page loads of a dozen repositories used up.
+RELEASES = {
+    "newReleaseWithin": "1w", "staleReleaseWithin": "6M", "showOnlyHighlighted": False, "showDetails": True,
+    "showOnlyIcon": False, "topReleases": 0,
+    "repositories": [
+        repo("Homarr", "github", "homarr-labs/homarr", "homarr", "v"),
+        repo("Paperless", "github", "paperless-ngx/paperless-ngx", "paperless-ngx", "v"),
+        repo("Arcane", "github", "getarcaneapp/arcane", "arcane", "v"),
+        repo("nebula-sync", "github", "lovelaze/nebula-sync", "pi-hole", "v"),
+        repo("Pi-hole", "dockerHub", "pihole/pihole", "pi-hole"),
+        repo("Uptime Kuma", "dockerHub", "louislam/uptime-kuma", "uptime-kuma"),
+        repo("n8n 2", "dockerHub", "n8nio/n8n", "n8n", "2.", 2),
+        repo("Metabase", "dockerHub", "metabase/metabase", "metabase", "v0."),
+        repo("Dozzle", "dockerHub", "amir20/dozzle", "dozzle", "v"),
+        repo("Caddy", "dockerHub", "caddy", "caddy"),
+        repo("Gotenberg", "dockerHub", "gotenberg/gotenberg", "gotenberg"),
+        repo("Postgres 18", "dockerHub", "postgres", "postgres", "18.", 1),
+        repo("Redis 8", "dockerHub", "redis", "redis", "8.", 2),
+    ],
+}
+
 items = [i for i in b["items"] if i["kind"] != "dnsHoleControls"
-         and not (i["kind"] == "app" and app_name.get(i["options"].get("appId")) == "GitHub")]
+         and not (i["kind"] == "app" and app_name.get(i["options"].get("appId")) not in ON_BOARD)]
 have = {app_name.get(i["options"].get("appId")) for i in items if i["kind"] == "app"}
-for name in (n for n, *_ in EXTRA_APPS if n not in have):
+for name in (n for n in ON_BOARD if n not in have):
     items.append({"id": nid(), "kind": "app", "options": {"appId": apps[name]}, "integrationIds": [],
                   "advancedOptions": {"title": None, "customCssClasses": [], "borderColor": ""}, "layouts": []})
-
+if not any(i["kind"] == "releases" for i in items):
+    items.append({"id": nid(), "kind": "releases", "options": {}, "integrationIds": [],
+                  "advancedOptions": {"title": None, "customCssClasses": [], "borderColor": ""}, "layouts": []})
 
 def at(it, section, x, y, w, h):
     it["layouts"] = [{"layoutId": L, "sectionId": section, "xOffset": x, "yOffset": y, "width": w, "height": h}]
@@ -77,8 +112,6 @@ for it in items:
             if name in names:
                 w = 12 // len(names)
                 at(it, dyn[group], names.index(name) * w, 0, w, 1)
-        if name in SERVER_TILES:
-            at(it, dyn["Servers"], SERVER_TILES.index(name) * 2, 4, 2, 1)
     elif k == "clock":
         at(it, top, 0, 0, 3, 2)
     elif k == "weather":
@@ -88,13 +121,20 @@ for it in items:
     elif k == "dnsHoleSummary":
         at(it, top, 9, 0, 3, 2)
     elif k == "healthMonitoring":
-        at(it, dyn["Servers"], 6 if ints["Proxmox prx2"] in it["integrationIds"] else 0, 0, 6, 4)
+        # Standalone hosts: the Nodes list is always 1/1 and repeats the CPU and RAM above it
+        # (prx1 runs no containers, so it lists VMs and storage only)
+        prx2 = ints["Proxmox prx2"] in it["integrationIds"]
+        it["options"]["visibleClusterSections"] = ["qemu", "lxc", "storage"] if prx2 else ["qemu", "storage"]
+        at(it, dyn["Proxmox hosts"], 6 if prx2 else 0, 0, 6, 4)
     elif k == "dockerContainers":
-        at(it, dyn["Containers & docs"], 0, 0, 8, 6)
+        at(it, dyn["Containers & updates"], 0, 0, 8, 6)
+    elif k == "releases":
+        it["options"] = RELEASES
+        at(it, dyn["Containers & updates"], 8, 0, 4, 6)
     elif k == "paperlessNgx":
-        at(it, dyn["Containers & docs"], 8, 0, 4, 3)
+        at(it, dyn["Documents & notes"], 0, 0, 6, 3)
     elif k == "notebook":
-        at(it, dyn["Containers & docs"], 8, 3, 4, 3)
+        at(it, dyn["Documents & notes"], 6, 0, 6, 3)
     if not it["layouts"]:
         raise SystemExit(f"no place for {k}")
 
