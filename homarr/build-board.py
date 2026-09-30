@@ -68,7 +68,7 @@ APPS = [
     ("prx1", "Proxmox VE: prdsrv1, prdsrv2, tstsrv1", "proxmox", "https://prx1.example.com", "https://prx1.example.com"),
     ("prx2", "Proxmox VE: prdsrv3", "proxmox", "https://prx2.example.com", "https://prx2.example.com"),
     ("Backup Server", "Proxmox Backup Server on prx2", "proxmox", "https://10.69.20.131:8007", ""),
-    ("UniFi", "Network, VLANs, DNS records", "ubiquiti-unifi", "https://unifi.ui.com", ""),
+    ("UniFi", "Network dashboard on the UDM SE", "ubiquiti-unifi", "https://10.69.1.1/network/default/dashboard", ""),
     ("Cloudflare", "example.com DNS", "cloudflare", "https://dash.cloudflare.com", ""),
 ]
 

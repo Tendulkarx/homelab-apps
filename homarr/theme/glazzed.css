@@ -4,7 +4,7 @@
    Every surface uses one of three glass levels, so no widget keeps its own grey:
      panel  (widget cards)          --gz-panel
      inset  (boxes inside a widget) --gz-inset
-     group  (headed section frames) --gz-group
+     (headed sections draw no frame: just their header text)
    The previous look is bluematrix.css (apply_theme.py switches). */
 @import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600&display=swap');
 
@@ -74,14 +74,16 @@ body {
 }
 
 /* ---- Headed groups: a frame with a frosted header set into its top edge -------------------- */
-.hl-group.mantine-Card-root {
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.07), var(--gz-group) 72px) !important;
-  border: 1px solid var(--gz-line) !important;
-  border-radius: 10px !important;
+/* Section frames are invisible: each item stands on its own, like the top row; only the
+   section's header text shows. */
+.hl-group.mantine-Card-root,
+.hl-group.mantine-Card-root:hover {
+  background: transparent !important;
+  border: 0 !important;
   box-shadow: none !important;
-  backdrop-filter: blur(6px);
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
 }
-.hl-group.mantine-Card-root:hover { border-color: var(--gz-line-strong) !important; box-shadow: none !important; }
 .hl-group > .mantine-Badge-root {
   top: -23px !important;
   left: 4px !important;
