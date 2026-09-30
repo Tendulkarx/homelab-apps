@@ -1,4 +1,4 @@
-/* Homelab board: "Glazzed" look (after the Glazzed admin theme), with rounded corners.
+/* Homelab board: "Glazzed" look (after the Glazzed admin theme), with subtle rounded corners.
    A soft blurred mesh of slate blue, violet, crimson and teal; translucent glass panels with
    hairline borders; thin white Open Sans; blue #2d8cf0 and green #4cd964 accents.
    Every surface uses one of three glass levels, so no widget keeps its own grey:
@@ -20,9 +20,9 @@
   --gz-inset: rgba(255, 255, 255, 0.055);
   --gz-inset-hover: rgba(45, 140, 240, 0.14);
   --gz-group: rgba(255, 255, 255, 0.025);
-  --gz-r-lg: 16px;
-  --gz-r: 12px;
-  --gz-r-sm: 9px;
+  --gz-r-lg: 8px;
+  --gz-r: 6px;
+  --gz-r-sm: 5px;
   --mantine-color-body: #232c44;
   --mantine-font-family: 'Open Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
   --mantine-font-family-headings: 'Open Sans', system-ui, sans-serif;
@@ -54,7 +54,7 @@ body {
 .mantine-AppShell-header input {
   background: var(--gz-inset) !important;
   border: 1px solid var(--gz-line) !important;
-  border-radius: 999px !important;
+  border-radius: var(--gz-r) !important;
   color: var(--gz-text) !important;
 }
 
@@ -77,65 +77,39 @@ body {
 .hl-group.mantine-Card-root {
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.07), var(--gz-group) 72px) !important;
   border: 1px solid var(--gz-line) !important;
-  border-radius: 20px !important;
+  border-radius: 10px !important;
   box-shadow: none !important;
   backdrop-filter: blur(6px);
 }
 .hl-group.mantine-Card-root:hover { border-color: var(--gz-line-strong) !important; box-shadow: none !important; }
 .hl-group > .mantine-Badge-root {
-  top: -16px !important;
-  left: 18px !important;
+  top: -23px !important;
+  left: 4px !important;
   height: auto !important;
-  padding: 6px 16px 6px 14px !important;
-  border-radius: 999px !important;
-  border: 1px solid var(--gz-line-strong) !important;
-  background: linear-gradient(90deg, rgba(45, 140, 240, 0.55), rgba(142, 108, 240, 0.40)) !important;
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  box-shadow: 0 6px 18px rgba(10, 16, 32, 0.35) !important;
-  color: #fff !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  color: var(--gz-text) !important;
+  overflow: visible !important;
   z-index: 3;
 }
 .hl-group > .mantine-Badge-root .mantine-Badge-label {
   font-family: 'Open Sans', sans-serif !important;
-  font-weight: 600 !important;
-  font-size: 13px !important;
-  letter-spacing: 0.08em !important;
-  text-transform: uppercase !important;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-}
-.hl-group > .mantine-Badge-root .mantine-Badge-label::before {
-  content: "";
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--gz-green);
-  box-shadow: 0 0 8px var(--gz-green);
+  font-weight: 400 !important;
+  font-size: 15px !important;
+  line-height: 20px !important;
+  letter-spacing: 0.02em !important;
+  text-transform: none !important;
+  color: rgba(255, 255, 255, 0.88) !important;
+  text-shadow: 0 1px 8px rgba(10, 16, 32, 0.45);
 }
 
-/* Widget titles: a small glass pill set into the card's top edge, right-hand side (matches the
-   section headers, never covers the widget's content) */
-.grid-stack-item > .mantine-Badge-root {
-  left: auto !important;
-  right: 18px !important;
-  top: -10px !important;
-  z-index: 5 !important;
-  backdrop-filter: blur(12px);
-  height: auto !important;
-  padding: 3px 10px !important;
-  border-radius: 999px !important;
-  border: 1px solid var(--gz-line) !important;
-  background: rgba(20, 28, 46, 0.85) !important;
-  color: var(--gz-text) !important;
-}
-.grid-stack-item > .mantine-Badge-root .mantine-Badge-label {
-  font-weight: 400 !important;
-  font-size: 11px !important;
-  text-transform: none !important;
-  letter-spacing: 0.02em !important;
-}
+/* Widget titles: hidden. They overlapped content, and each widget already names itself
+   (Proxmox panels show the host, the container table has a Host column). */
+.grid-stack-item > .mantine-Badge-root { display: none !important; }
 
 /* ---- Insets: boxes inside widgets (stat tiles, Pi-hole summary, node lists, controls) ------ */
 [class*="__statTile"],
@@ -159,7 +133,7 @@ body {
   background: rgba(255, 255, 255, 0.10) !important;
   color: var(--gz-text) !important;
 }
-.mantine-Badge-root { border-radius: 999px !important; }
+.mantine-Badge-root { border-radius: 4px !important; }
 
 /* Buttons: rounded; neutral ones in glass (coloured ones keep their tint) */
 .mantine-Button-root, .mantine-ActionIcon-root { border-radius: var(--gz-r-sm) !important; }
@@ -175,11 +149,15 @@ body {
   background-color: transparent !important;
   border-color: var(--gz-line) !important;
 }
-.mantine-Table-th {
-  background-color: rgba(255, 255, 255, 0.05) !important;
+.mantine-Table-th, .mantine-Table-thead, .mantine-Table-thead .mantine-Table-tr,
+.mantine-datatable-header, .mantine-datatable-header-cell-sortable {
+  background: rgba(255, 255, 255, 0.07) !important;
+  background-color: rgba(255, 255, 255, 0.07) !important;
   border-color: var(--gz-line) !important;
-  backdrop-filter: blur(10px);
+  box-shadow: none !important;
+  color: var(--gz-text) !important;
 }
+.mantine-Table-thead .mantine-Table-th { background: transparent !important; }
 .mantine-Table-tbody .mantine-Table-tr:nth-of-type(odd) { background-color: rgba(255, 255, 255, 0.025) !important; }
 .mantine-Table-tbody .mantine-Table-tr:hover { background-color: var(--gz-inset-hover) !important; }
 
