@@ -1,0 +1,19 @@
+# Lets Dozzle (on prdsrv1) show this host's container logs. Runs on prdsrv2 and prdsrv3.
+# .env: DOZZLE_HOSTNAME (this host's name) and AGENT_BIND (this host's IP).
+# data/cert.pem and data/key.pem are the lab's own Dozzle certificate (README.md): the agent
+# only answers a Dozzle holding it, not any Dozzle on the network.
+services:
+  dozzle-agent:
+    image: amir20/dozzle:v11.1.2
+    container_name: dozzle-agent
+    command: agent
+    restart: unless-stopped
+    environment:
+      - DOZZLE_HOSTNAME=${DOZZLE_HOSTNAME}
+      - DOZZLE_NO_ANALYTICS=true
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./data/cert.pem:/dozzle_cert.pem:ro
+      - ./data/key.pem:/dozzle_key.pem:ro
+    ports:
+      - "${AGENT_BIND:?set AGENT_BIND in .env}:7007:7007"
