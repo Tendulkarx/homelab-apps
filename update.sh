@@ -6,6 +6,7 @@
 #   ./update.sh n8n caddy       only these folders
 #   ./update.sh --dry-run       show what would change, change nothing
 #   ./update.sh --no-backup     skip the VM backups (they take a few minutes per host)
+#   ./update.sh --yes           do not ask (for a non-interactive shell)
 #
 # Steps: bump the pinned tags, commit and push, back up each affected host (proxmox-lab
 # `make backup`), then on each host `git pull` and recreate only the updated apps, Caddy
@@ -17,12 +18,13 @@ cd "$(dirname "$0")"
 source ./check-updates.sh
 LAB=${PROXMOX_LAB:-../proxmox-lab}
 
-dry=false backup=true only=()
+dry=false backup=true yes=false only=()
 for a in "$@"; do
   case $a in
     --dry-run) dry=true ;;
     --no-backup) backup=false ;;
-    -h|--help) sed -n '2,14p' "$0"; exit 0 ;;
+    --yes|-y) yes=true ;;
+    -h|--help) sed -n '2,15p' "$0"; exit 0 ;;
     -*) echo "Unknown option $a" >&2; exit 2 ;;
     *) only+=("${a%/}") ;;
   esac
@@ -56,8 +58,10 @@ for h in $(for d in $folders; do hosts_for "$d"; done | sort -u); do
   echo "  $h: $(for d in $folders; do grep -qx "$d" "hosts/$h" && printf '%s ' "$d"; done)"
 done
 $dry && { echo "(dry run: nothing changed)"; exit 0; }
-read -r -p "Update these now? Each app restarts for a few seconds; Caddy (every site) last. [y/N] " ok
-[ "$ok" = y ] || [ "$ok" = Y ] || { echo "Nothing changed."; exit 0; }
+if ! $yes; then
+  read -r -p "Update these now? Each app restarts for a few seconds; Caddy (every site) last. [y/N] " ok
+  [ "$ok" = y ] || [ "$ok" = Y ] || { echo "Nothing changed."; exit 0; }
+fi
 
 # 2. Bump the tags, commit, push
 summary=()
