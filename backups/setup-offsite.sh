@@ -5,7 +5,7 @@
 #
 # First run: a browser opens for Google sign-in. rclone asks only for the drive.file scope,
 # so it can see the files it makes and nothing else in the Drive. Two random encryption keys are
-# made. The Drive token and the keys go into 1Password item prdsrv2-rclone (vault Development):
+# made. The Drive token and the keys go into 1Password item homelab-rclone-offsite (vault Development):
 # without the keys the off-site copies cannot be read, so that item is the only way back.
 # Later runs (a rebuilt prdsrv2) read the item and only rewrite the server's rclone config.
 #
@@ -15,7 +15,7 @@
 set -euo pipefail
 
 VAULT=Development
-ITEM=prdsrv2-rclone
+ITEM=homelab-rclone-offsite
 # Every host with db_backups (proxmox-lab inventory): prdsrv2 (databases), prdsrv1 (n8n, Paperless)
 HOSTS=(turbx@10.69.20.114 turbx@10.69.20.113)
 ssh_to() { ssh -i "$HOME/.ssh/id_ed25519_homelab" -o BatchMode=yes "$@"; }

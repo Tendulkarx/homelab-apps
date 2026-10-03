@@ -1,4 +1,4 @@
-# Secrets: the values live in 1Password as op://Development/prdsrv2-<app>/env/<NAME>
+# Secrets: the values live in 1Password as op://Development/homelab-<app>/env/<NAME>
 .env
 .env.global
 postgres/init/02-users.sql

@@ -18,7 +18,7 @@ retired during 2026 (rclone warns on every run), so the off-site copy needs its 
 
 ## 2. Keep them and sign in again (Mac)
 
-Add two fields to 1Password item `prdsrv2-rclone` (vault Development): `client_id` and
+Add two fields to 1Password item `homelab-rclone-offsite` (vault Development): `client_id` and
 `client_secret` (concealed). Then:
 
 ```bash

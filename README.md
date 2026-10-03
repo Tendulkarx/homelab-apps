@@ -105,7 +105,7 @@ sure a fresh backup exists first.
 ## Secrets
 
 `.env` files are never committed. Their values are in 1Password (vault **Development**), one
-item per app named `prdsrv2-<app>` (named before apps moved to prdsrv1; the names stay), one
+item per app named `homelab-<app>` (host-agnostic, so moving an app to another host needs no rename), one
 field per line of the file. Per-host values (see above) are added by hand. Each `.env.example` lists
 every setting with its 1Password reference, so a lost `.env` is rebuilt with:
 
@@ -113,11 +113,11 @@ every setting with its 1Password reference, so a lost `.env` is rebuilt with:
 op inject -i .env.example -o .env
 ```
 
-Dozzle's login (user `turbx`) is the 1Password item `prdsrv2-dozzle`. The server only holds a
+Dozzle's login (user `turbx`) is the 1Password item `homelab-dozzle`. The server only holds a
 hash of it in `dozzle/data/users.yml`, which is not committed; to rebuild that file, from the Mac:
 
 ```bash
-op read op://Development/prdsrv2-dozzle/password | ssh prdsrv1 'cd /opt/docker/dozzle && mkdir -p data &&
+op read op://Development/homelab-dozzle/password | ssh prdsrv1 'cd /opt/docker/dozzle && mkdir -p data &&
   docker run --rm amir20/dozzle:v11.1.2 generate turbx --password "$(cat)" > data/users.yml'
 ```
 
@@ -131,7 +131,7 @@ ARGS="--tags beszel"` in proxmox-lab for prx1 and prx2, and update the system id
 `homarr/theme/layout.py`.
 
 `postgres/init/02-users.sql` is not committed either (it contains passwords); its original
-values are in `prdsrv2-postgres`.
+values are in `homelab-postgres`.
 
 ## What is not in git, and where it is kept
 

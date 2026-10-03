@@ -13,7 +13,7 @@
 #                        stored credentials)
 #   paperless.tar.gz     document_exporter output: document_importer restores it
 #   homarr/db.sqlite     Homarr's boards, apps and integrations (online copy; its secrets need
-#                        SECRET_ENCRYPTION_KEY from 1Password prdsrv1-homarr)
+#                        SECRET_ENCRYPTION_KEY from 1Password homelab-homarr)
 #
 # One part failing does not stop the others; the exit code is then 1 and the heartbeat is
 # not sent, so Uptime Kuma reports it. Passwords are read inside each container from its own

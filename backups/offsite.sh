@@ -5,7 +5,7 @@
 #
 # The remote `offsite:` (crypt over Drive folder homelab-offsite, drive.file scope, so rclone
 # sees only what it made) is in /root/.config/rclone/rclone.conf, written by setup-offsite.sh
-# from 1Password item prdsrv2-rclone. Without those keys the copies cannot be read: they are
+# from 1Password item homelab-rclone-offsite. Without those keys the copies cannot be read: they are
 # in 1Password only.
 #
 # Restore: sudo rclone copy offsite:daily/<date>/<host> /tmp/restore
