@@ -4,7 +4,7 @@
 # only answers a Dozzle holding it, not any Dozzle on the network.
 services:
   dozzle-agent:
-    image: amir20/dozzle:v11.1.2
+    image: amir20/dozzle:v11.2.0
     container_name: dozzle-agent
     command: agent
     restart: unless-stopped
