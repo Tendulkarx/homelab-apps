@@ -74,6 +74,9 @@ RAIL_TABLE = {"sortBy": "name", "showCpu": True, "showMemory": True, "showDisk":
               "showLoadAvg": False, "showNet": False, "showTemp": False, "showBattery": False, "showServices": False,
               "showUptime": False, "showAgent": False, "columnOrder": "", "columnWidths": ""}
 NO_TITLE = {"title": None, "customCssClasses": [], "borderColor": ""}
+# Custom widgets (../widgets/*.json, deployed by widgets.py) and where they go in the sidebar:
+# name: (y, height). On Mobile, which has no sidebar, they go at the bottom of the main board.
+WIDGETS = {"Backups": (2, 6)}
 
 
 def history(system_id):
@@ -100,6 +103,10 @@ MOBILE = next(lay["id"] for lay in b["layouts"] if lay["role"] == "mobile")
 top = next(s for s in b["sections"] if s["kind"] == "empty" and s.get("xOffset", 0) == 0)["id"]
 rail = next((s["id"] for s in b["sections"] if s["kind"] == "empty" and s.get("xOffset") == 1), None)
 ints = {i["name"]: i["id"] for i in query("integration.all")}
+custom = {w["name"]: w for w in query("customWidget.list") if w["name"] in WIDGETS}
+for name in WIDGETS:
+    if name not in custom:
+        print(f"custom widget {name} not deployed yet: run widgets.py first; skipped")
 
 # 1. Apps: create or update every app in apps.toml, so Homarr matches the file
 changes = []
@@ -178,6 +185,13 @@ for kind, integration, opts in (("beszelSystemGrid", "Beszel", SERVER_GRID), ("r
                       "advancedOptions": dict(NO_TITLE), "layouts": []})
 
 
+for name, w in custom.items():
+    if not any(i["kind"] == "customApi" and i["options"].get("definitionId") == w["id"] for i in items):
+        changes.append(f"add custom widget {name}")
+        items.append({"id": nid(), "kind": "customApi", "integrationIds": [], "advancedOptions": dict(NO_TITLE), "layouts": [],
+                      "options": {"definitionId": w["id"], "configuration": {}, "configurationVersion": 0}})
+
+
 def place(it, section, x, y, w, h):
     mob = [lay for lay in it["layouts"] if lay["layoutId"] == MOBILE and lay["sectionId"] == section] or [
         {"layoutId": MOBILE, "sectionId": section, "xOffset": 0, "yOffset": mobile_slot(section, h), "width": 3, "height": h}]
@@ -215,6 +229,13 @@ for it in items:
     elif k == "beszelSystemTable" and rail:
         it["options"] = it["options"] or dict(RAIL_TABLE)
         it["layouts"] = [{"layoutId": BASE, "sectionId": rail, "xOffset": 0, "yOffset": 0, "width": RAIL_COLUMNS, "height": 2}]
+    elif k == "customApi" and rail:
+        name = next((n for n, w in custom.items() if w["id"] == it["options"].get("definitionId")), None)
+        if name:
+            y, h = WIDGETS[name]
+            mob = [lay for lay in it["layouts"] if lay["layoutId"] == MOBILE] or [
+                {"layoutId": MOBILE, "sectionId": top, "xOffset": 0, "yOffset": mobile_slot(top, h + 1), "width": 3, "height": h + 1}]
+            it["layouts"] = [{"layoutId": BASE, "sectionId": rail, "xOffset": 0, "yOffset": y, "width": RAIL_COLUMNS, "height": h}] + mob
     elif k == "paperlessNgx":
         place(it, cid["Documents & notes"], 0, 0, 6, 3)
     elif k == "notebook":

@@ -1,0 +1,69 @@
+{
+  "$schema": "homarr-custom-widget-v2",
+  "name": "Backups",
+  "description": "Last run of every backup job and scheduled job: Proxmox backups of each machine, database and app dumps, off-site copies, property-search.",
+  "sources": {
+    "default": {
+      "type": "integration",
+      "integrationKind": "proxmox",
+      "integrationName": "Proxmox prx1"
+    },
+    "prx2": {
+      "type": "integration",
+      "integrationKind": "proxmox",
+      "integrationName": "Proxmox prx2"
+    },
+    "kuma": {
+      "type": "integration",
+      "integrationKind": "uptimeKuma",
+      "integrationName": "Uptime Kuma"
+    }
+  },
+  "requests": {
+    "prx1": {
+      "path": "/api2/json/nodes/prx-server-1/tasks",
+      "query": {
+        "typefilter": "vzdump",
+        "limit": 40
+      }
+    },
+    "prx2": {
+      "source": "prx2",
+      "path": "/api2/json/nodes/prx-server-2/tasks",
+      "query": {
+        "typefilter": "vzdump",
+        "limit": 20
+      }
+    },
+    "kuma": {
+      "source": "kuma",
+      "path": "/api/status-page/heartbeat/homelab"
+    }
+  },
+  "templateLines": [
+    "<Stack gap={6} p=\"sm\">",
+    "  <Group justify=\"space-between\" wrap=\"nowrap\">",
+    "    <Text fw={600} size=\"sm\">Backups &amp; jobs</Text>",
+    "    <RefreshButton label=\"Refresh\" />",
+    "  </Group>",
+    "  {[[\"prdsrv1\", \"Proxmox backup\", \"prx1\", \"100\"], [\"prdsrv2\", \"Proxmox backup\", \"prx1\", \"101\"], [\"prdsrv3\", \"Proxmox backup\", \"prx2\", \"102\"]].map(row =>",
+    "    <Group key={row[0]} justify=\"space-between\" wrap=\"nowrap\" gap=\"xs\">",
+    "      <Stack gap={0} style={{ minWidth: 0 }}>",
+    "        <Text size=\"sm\" truncate>{row[0]} <Text span c=\"dimmed\" size=\"xs\">{row[1]}</Text></Text>",
+    "        <Text size=\"xs\" c=\"dimmed\" truncate>{(data[row[2]]?.data ?? []).find(task => task.id === row[3]) ? Date.toLocaleString((data[row[2]]?.data ?? []).find(task => task.id === row[3]).endtime * 1000, \"en-GB\", \"Europe/London\") : \"no run found\"}</Text>",
+    "      </Stack>",
+    "      <Badge size=\"sm\" style={{ flexShrink: 0 }} color={(data[row[2]]?.data ?? []).find(task => task.id === row[3])?.status === \"OK\" ? \"green\" : (data[row[2]]?.data ?? []).find(task => task.id === row[3]) ? \"red\" : \"gray\"}>{(data[row[2]]?.data ?? []).find(task => task.id === row[3])?.status === \"OK\" ? \"OK\" : (data[row[2]]?.data ?? []).find(task => task.id === row[3]) ? \"Failed\" : \"None\"}</Badge>",
+    "    </Group>)}",
+    "  {[[\"Database dumps\", \"prdsrv2\", \"14\"], [\"App dumps\", \"prdsrv1\", \"16\"], [\"Off-site copy\", \"prdsrv2\", \"15\"], [\"Off-site copy\", \"prdsrv1\", \"17\"], [\"property-search\", \"08 11 15 20h\", \"12\"]].map(row =>",
+    "    <Group key={row[0] + row[1]} justify=\"space-between\" wrap=\"nowrap\" gap=\"xs\">",
+    "      <Stack gap={0} style={{ minWidth: 0 }}>",
+    "        <Text size=\"sm\" truncate>{row[0]} <Text span c=\"dimmed\" size=\"xs\">{row[1]}</Text></Text>",
+    "        <Text size=\"xs\" c=\"dimmed\" truncate>{(data.kuma?.heartbeatList?.[row[2]] ?? []).length > 0 ? Date.toLocaleString((data.kuma.heartbeatList[row[2]])[(data.kuma.heartbeatList[row[2]]).length - 1].time.replace(\" \", \"T\") + \"Z\", \"en-GB\", \"Europe/London\") : \"no heartbeat\"}</Text>",
+    "      </Stack>",
+    "      <Badge size=\"sm\" style={{ flexShrink: 0 }} color={(data.kuma?.heartbeatList?.[row[2]] ?? []).length === 0 ? \"gray\" : (data.kuma.heartbeatList[row[2]])[(data.kuma.heartbeatList[row[2]]).length - 1].status === 1 ? \"green\" : \"red\"}>{(data.kuma?.heartbeatList?.[row[2]] ?? []).length === 0 ? \"None\" : (data.kuma.heartbeatList[row[2]])[(data.kuma.heartbeatList[row[2]]).length - 1].status === 1 ? \"OK\" : \"Failed\"}</Badge>",
+    "    </Group>)}",
+    "  {status.prx1?.ok === false || status.prx2?.ok === false || status.kuma?.ok === false ? <Text size=\"xs\" c=\"red\">Some sources could not be read; refresh to retry.</Text> : null}",
+    "  <Text size=\"xs\" c=\"dimmed\">UK time. Proxmox nightly: prx1 03:30, prx2 02:30.</Text>",
+    "</Stack>"
+  ]
+}
