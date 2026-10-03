@@ -185,6 +185,7 @@ body {
 /* ---- Insets: boxes inside widgets (stat tiles, Pi-hole summary, node lists) --------------- */
 [class*="__statTile"],
 .summary-card,
+.customApi-wrapper .mantine-Paper-root,
 .releases-repository-details,
 .mantine-Accordion-item {
   background: var(--gz-inset) !important;

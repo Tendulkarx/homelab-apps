@@ -29,16 +29,14 @@ CSS of its own, so the theme lives in one place. Run it on the Mac (Touch ID onc
 - `../widgets/*.json` + `widgets.py`: custom widgets (Homarr 2 Custom JSX). `widgets.py` previews
   each one, runs every query against the real service (Homarr's required evidence) and saves it;
   `layout.py` places it (WIDGETS). Sources name saved integrations, so the files hold no ids or
-  secrets. **Backups & jobs** (sidebar; bottom of the board on Mobile): the last Proxmox backup of
+  secrets. **Backups & jobs** (its own row under Servers; eight cards, four a row, two on a phone): the last Proxmox backup of
   each machine from the task log (Homarr's Proxmox user is read-only, which cannot list backup
   files, but can read tasks), and the last heartbeat of the dump, off-site and property-search
   push monitors from Uptime Kuma's homelab status page. It shows times and OK/Failed; Homarr gives
   templates no clock, so it cannot flag a backup as overdue by itself.
-- Right sidebar (Homarr 2 "rail", 3 columns, desktop only; stays put while the board scrolls):
-  Beszel's server table, CPU, memory and disk for every machine. The Base layout is 15 columns so
-  the main board keeps 12. The header (the owner's) adds a Docker button; set by apply_theme.py.
-  Statistics widget: not used. It shows hand-refreshed snapshots, the live Pi-hole and Uptime Kuma
-  widgets do better, and Caddy's figures would need its admin API opened to Homarr.
+- No sidebar: a right "rail" (Homarr 2) with a server table was tried on 2026-10-03 and dropped;
+  Base is 12 columns. The owner's header adds a Docker button (apply_theme.py). The Statistics
+  widget is not used: it shows hand-refreshed snapshots, and the live widgets do better.
 - `layout.py`: the whole layout (Homarr 2: containers, Base and Mobile layouts; it sets Base and
   keeps Mobile's own positions; widget settings are defaults for new widgets only). A top row (clock, weather, Uptime Kuma, Pi-hole), then headed
   groups that never collapse (Homarr "dynamic" sections). First every link, one balanced row

@@ -26,7 +26,8 @@ GH = "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/{}.png"
 # Headed groups: (title, 20 characters at most; y; height) in Base, full width.
 # Links first (apps, monitoring and network, servers), then the live panels below them.
 GROUPS = [("Apps", 2, 1), ("Monitoring & network", 3, 1), ("Infrastructure", 4, 1),
-          ("Servers", 5, 3), ("Host history", 8, 4), ("Containers & updates", 12, 6), ("Documents & notes", 18, 3)]
+          ("Servers", 5, 3), ("Backups & jobs", 8, 3), ("Host history", 11, 4), ("Containers & updates", 15, 6),
+          ("Documents & notes", 21, 3)]
 
 
 def nid():
@@ -67,16 +68,12 @@ SERVER_GRID = {"statusFilter": "all", "showCpu": True, "showMemory": True, "show
 # Charts for the two physical hosts (Beszel system ids). A hub rebuilt from nothing gives every
 # machine a new id: read them from beszel.example.com (a system's page address) and update these.
 HOST_HISTORY = {"prx1": "03hzcypegtkki1k", "prx2": "ovs2248dq83evvn"}
-# Right sidebar (Homarr 2 "rail": stays put while the board scrolls; none on Mobile). The Base
-# layout is widened by the same number of columns, so the main board keeps its 12.
-RAIL_COLUMNS = 3
-RAIL_TABLE = {"sortBy": "name", "showCpu": True, "showMemory": True, "showDisk": True, "showGpu": False,
-              "showLoadAvg": False, "showNet": False, "showTemp": False, "showBattery": False, "showServices": False,
-              "showUptime": False, "showAgent": False, "columnOrder": "", "columnWidths": ""}
+# No sidebar (a right rail was tried on 2026-10-03 and dropped): Base is 12 columns, no rails.
+RAIL_COLUMNS = 0
 NO_TITLE = {"title": None, "customCssClasses": [], "borderColor": ""}
-# Custom widgets (../widgets/*.json, deployed by widgets.py) and where they go in the sidebar:
-# name: (y, height). On Mobile, which has no sidebar, they go at the bottom of the main board.
-WIDGETS = {"Backups": (2, 6)}
+# Custom widgets (../widgets/*.json, deployed by widgets.py):
+#   name: (group, x, y, width, height, height on Mobile)
+WIDGETS = {"Backups": ("Backups & jobs", 0, 0, 12, 3, 5)}
 
 
 def history(system_id):
@@ -90,7 +87,7 @@ spec = tomllib.loads((Path(__file__).resolve().parent.parent / "apps.toml").read
 b = query("board.getBoardByName", {"name": "Homelab"})
 base_layout = next(lay for lay in b["layouts"] if lay["role"] == "base")
 if (base_layout["columnCount"], base_layout["rightGutterColumnCount"]) != (12 + RAIL_COLUMNS, RAIL_COLUMNS):
-    print(f"Base layout: {base_layout['columnCount']} columns -> {12 + RAIL_COLUMNS}, right sidebar {RAIL_COLUMNS}")
+    print(f"Base layout: {base_layout['columnCount']} columns -> {12 + RAIL_COLUMNS}, sidebar {base_layout['rightGutterColumnCount']} -> {RAIL_COLUMNS}")
     if not DRY:
         layouts = [dict(lay) for lay in b["layouts"]]
         for lay in layouts:
@@ -101,7 +98,6 @@ if (base_layout["columnCount"], base_layout["rightGutterColumnCount"]) != (12 + 
 BASE = next(lay["id"] for lay in b["layouts"] if lay["role"] == "base")
 MOBILE = next(lay["id"] for lay in b["layouts"] if lay["role"] == "mobile")
 top = next(s for s in b["sections"] if s["kind"] == "empty" and s.get("xOffset", 0) == 0)["id"]
-rail = next((s["id"] for s in b["sections"] if s["kind"] == "empty" and s.get("xOffset") == 1), None)
 ints = {i["name"]: i["id"] for i in query("integration.all")}
 custom = {w["name"]: w for w in query("customWidget.list") if w["name"] in WIDGETS}
 for name in WIDGETS:
@@ -165,6 +161,9 @@ for title, y, h in GROUPS:
 items = []
 on_board = {n for names in tiles.values() for n in names}
 for it in b["items"]:
+    if it["kind"] == "beszelSystemTable":  # the sidebar's server table, now gone
+        changes.append("remove the sidebar server table")
+        continue
     if it["kind"] == "app" and app_name.get(it["options"].get("appId")) not in on_board:
         changes.append(f"remove tile {app_name.get(it['options'].get('appId'), '?')}")
         continue
@@ -178,8 +177,7 @@ for host, sid in HOST_HISTORY.items():
     if not any(i["kind"] == "beszelSystemStats" and i["options"].get("systemId") == sid for i in items):
         items.append({"id": nid(), "kind": "beszelSystemStats", "options": history(sid), "integrationIds": [ints["Beszel"]],
                       "advancedOptions": dict(NO_TITLE), "layouts": []})
-for kind, integration, opts in (("beszelSystemGrid", "Beszel", SERVER_GRID), ("releases", None, RELEASES),
-                                ("beszelSystemTable", "Beszel", RAIL_TABLE)):
+for kind, integration, opts in (("beszelSystemGrid", "Beszel", SERVER_GRID), ("releases", None, RELEASES)):
     if not any(i["kind"] == kind for i in items):
         items.append({"id": nid(), "kind": kind, "options": dict(opts), "integrationIds": [ints[integration]] if integration else [],
                       "advancedOptions": dict(NO_TITLE), "layouts": []})
@@ -226,16 +224,14 @@ for it in items:
         it["options"]["repositories"] = RELEASES["repositories"]  # the list follows homelab-apps; other settings stay
         it["options"] = {**RELEASES, **it["options"]}
         place(it, cid["Containers & updates"], 8, 0, 4, 6)
-    elif k == "beszelSystemTable" and rail:
-        it["options"] = it["options"] or dict(RAIL_TABLE)
-        it["layouts"] = [{"layoutId": BASE, "sectionId": rail, "xOffset": 0, "yOffset": 0, "width": RAIL_COLUMNS, "height": 2}]
-    elif k == "customApi" and rail:
+    elif k == "customApi":
         name = next((n for n, w in custom.items() if w["id"] == it["options"].get("definitionId")), None)
         if name:
-            y, h = WIDGETS[name]
-            mob = [lay for lay in it["layouts"] if lay["layoutId"] == MOBILE] or [
-                {"layoutId": MOBILE, "sectionId": top, "xOffset": 0, "yOffset": mobile_slot(top, h + 1), "width": 3, "height": h + 1}]
-            it["layouts"] = [{"layoutId": BASE, "sectionId": rail, "xOffset": 0, "yOffset": y, "width": RAIL_COLUMNS, "height": h}] + mob
+            group, x, y, w, h, mobile_h = WIDGETS[name]
+            place(it, cid[group], x, y, w, h)
+            for lay in it["layouts"]:
+                if lay["layoutId"] == MOBILE:
+                    lay["height"] = mobile_h
     elif k == "paperlessNgx":
         place(it, cid["Documents & notes"], 0, 0, 6, 3)
     elif k == "notebook":
