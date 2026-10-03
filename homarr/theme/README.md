@@ -29,7 +29,7 @@ CSS of its own, so the theme lives in one place. Run it on the Mac (Touch ID onc
 - `../widgets/*.json` + `widgets.py`: custom widgets (Homarr 2 Custom JSX). `widgets.py` previews
   each one, runs every query against the real service (Homarr's required evidence) and saves it;
   `layout.py` places it (WIDGETS). Sources name saved integrations, so the files hold no ids or
-  secrets. **Backups & jobs** (under Servers; eight one-line boxes in a row, two a row on a phone; hover a time for its date): the last Proxmox backup of
+  secrets. **Backups & jobs** (under Servers; six boxes on the tile columns, two a row on a phone; Dumps and Off-site each pair two jobs, hover for dates): the last Proxmox backup of
   each machine from the task log (Homarr's Proxmox user is read-only, which cannot list backup
   files, but can read tasks), and the last heartbeat of the dump, off-site and property-search
   push monitors from Uptime Kuma's homelab status page. It shows times and OK/Failed; Homarr gives
@@ -37,12 +37,15 @@ CSS of its own, so the theme lives in one place. Run it on the Mac (Touch ID onc
 - No sidebar: a right "rail" (Homarr 2) with a server table was tried on 2026-10-03 and dropped;
   Base is 12 columns. The owner's header adds a Docker button (apply_theme.py). The Statistics
   widget is not used: it shows hand-refreshed snapshots, and the live widgets do better.
-- Grid: Base and Wide are 24 columns (Homarr's maximum); layout.py writes positions in 12-column
-  units and doubles them (SCALE), which allows half rows. Homarr 2's cells are square, so rows grow
-  with the screen: Wide (from 1680px) gives Backups & jobs half a row, Base (768 to 1679px) a full
-  one, as half a row there is too short for even a one-line box. Servers is 2.5 rows, which keeps
-  Beszel's grid at five machines in one row (it picks columns from the card's shape). Section
-  headings are sized against the canvas zoom (`--board-canvas-inverse-scale`), a true 14px.
+- Grid and alignment: 12 columns (24 was tried: Homarr zooms a 24-column board to a third and
+  widgets that do not compensate became unreadable). Every row is a container, the top row too
+  ("Overview", no heading), so all cards share one inner grid and their edges line up. Backups &
+  jobs is a tile row: six boxes on the tiles' columns. On Mobile containers are as tall as their
+  contents (MOBILE_MIN for Servers) and in the desktop order.
+- Text: the board is drawn zoomed out (about two-thirds); widgets that do not scale their text back
+  (app names, Uptime Kuma, Paperless) and section headings get sizes multiplied by
+  `--board-canvas-inverse-scale` in glazzed.css; badges use Mantine's `--mantine-scale`.
+- `deploy.py` runs apply_theme.py, widgets.py and layout.py in one process: one Touch ID prompt.
 - `layout.py`: the whole layout (Homarr 2: containers, Base and Mobile layouts; it sets Base and
   keeps Mobile's own positions; widget settings are defaults for new widgets only). A top row (clock, weather, Uptime Kuma, Pi-hole), then headed
   groups that never collapse (Homarr "dynamic" sections). First every link, one balanced row

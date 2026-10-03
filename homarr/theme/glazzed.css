@@ -84,8 +84,8 @@ body {
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
 }
-/* Homarr 1.x needed the section's inner grid pulled out by one gutter to line up with the top
-   row; Homarr 2's containers inset their grid themselves, so that rule is gone. */
+/* Every row (the top row too, as "Overview") is a container, so all cards share one inner grid
+   and their edges line up; no alignment rules are needed. */
 /* Section headings sit on the board canvas, which Homarr 2 zooms to fit the screen (to a third at
    24 columns), so a plain 14px heading came out about 5px. Multiplying by the canvas's inverse
    zoom gives a true 14px at every width. */
@@ -120,15 +120,19 @@ body {
    glass and hover of every other item, with the page's 20px gutter between them. Its built-in
    hover was a grey wash, and the blue edge lit up the whole row at once. */
 .beszelSystemGrid-wrapper.board-grid-item-content.mantine-Card-root,
-.beszelSystemGrid-wrapper.board-grid-item-content.mantine-Card-root:hover {
+.beszelSystemGrid-wrapper.board-grid-item-content.mantine-Card-root:hover,
+.customApi-wrapper.board-grid-item-content.mantine-Card-root,
+.customApi-wrapper.board-grid-item-content.mantine-Card-root:hover {
   background: transparent !important;
   border: 0 !important;
   box-shadow: none !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
 }
-.beszelSystemGrid-wrapper [style*="grid-template-columns"] { gap: 20px !important; }
-.beszelSystemGrid-wrapper .mantine-Card-root {
+/* 20px between machines, as between every other card; the grid is drawn on the zoomed canvas */
+.beszelSystemGrid-wrapper [style*="grid-template-columns"] { gap: calc(20px * var(--board-canvas-inverse-scale, 1)) !important; }
+.beszelSystemGrid-wrapper .mantine-Card-root,
+.customApi-wrapper .mantine-Paper-root {
   background: var(--gz-panel) !important;
   border: 1px solid var(--gz-line) !important;
   border-radius: var(--gz-r-lg) !important;
@@ -137,7 +141,8 @@ body {
   box-shadow: 0 10px 30px rgba(8, 12, 24, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
-.beszelSystemGrid-wrapper .mantine-Card-root:hover {
+.beszelSystemGrid-wrapper .mantine-Card-root:hover,
+.customApi-wrapper .mantine-Paper-root:hover {
   background: var(--gz-panel) !important;
   border-color: rgba(45, 140, 240, 0.50) !important;
   box-shadow: 0 12px 34px rgba(45, 140, 240, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.07) !important;
@@ -188,7 +193,6 @@ body {
 /* ---- Insets: boxes inside widgets (stat tiles, Pi-hole summary, node lists) --------------- */
 [class*="__statTile"],
 .summary-card,
-.customApi-wrapper .mantine-Paper-root,
 .releases-repository-details,
 .mantine-Accordion-item {
   background: var(--gz-inset) !important;
@@ -251,8 +255,21 @@ h1, h2, h3, h4, .mantine-Title-root {
 }
 .mantine-Text-root { font-family: 'Open Sans', sans-serif !important; }
 
-/* App tiles */
-.app-title { font-size: 14px !important; font-weight: 400 !important; color: var(--gz-text) !important; }
+/* ---- Text Homarr 2 does not size for its zoomed canvas ---------------------------------------- */
+/* The board is drawn zoomed out to fit the screen (to about two-thirds); widgets written for
+   Homarr 2 scale their text back up, these do not, so their text came out 4-9px. Multiplying by
+   the canvas's inverse zoom gives these sizes on screen at every width. */
+.app-title { font-size: calc(13px * var(--board-canvas-inverse-scale, 1)) !important; font-weight: 400 !important; color: var(--gz-text) !important; }
+.uptimeKuma-wrapper [class*="__heroLabel"], .paperlessNgx-wrapper [class*="__heroLabel"],
+.paperlessNgx-wrapper [class*="__heroTotal"] { font-size: calc(12px * var(--board-canvas-inverse-scale, 1)) !important; }
+.uptimeKuma-wrapper [class*="__statLabel"] { font-size: calc(11px * var(--board-canvas-inverse-scale, 1)) !important; }
+.uptimeKuma-wrapper [class*="__statValue"] { font-size: calc(15px * var(--board-canvas-inverse-scale, 1)) !important; }
+.paperlessNgx-wrapper [class*="__heroInbox"] { font-size: calc(16px * var(--board-canvas-inverse-scale, 1)) !important; }
+/* Small badges (machine names, container states, job results): 11px on screen. Inside a card,
+   Mantine multiplies its sizes by --mantine-scale to undo the canvas zoom; so does this. */
+.beszelSystemGrid-wrapper .mantine-Card-root .mantine-Badge-label,
+.dockerContainers-wrapper .mantine-Badge-label,
+.customApi-wrapper .mantine-Badge-label { font-size: calc(11px * var(--mantine-scale, 1)) !important; }
 .app-wrapper:hover .app-title { color: var(--gz-blue) !important; }
 
 /* ---- Notebook -------------------------------------------------------------------------------- */

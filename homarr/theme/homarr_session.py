@@ -26,7 +26,10 @@ def api_key():
 
 
 def login():
-    """Load the API key and check Homarr accepts it (named for when this signed in with a password)."""
+    """Load the API key once per process and check Homarr accepts it (deploy.py runs several scripts
+    in one process, so that is one Touch ID prompt)."""
+    if "ApiKey" in _headers:
+        return
     _headers["ApiKey"] = api_key()
     try:
         opener.open(urllib.request.Request(BASE + "/api/apps", headers=_headers))

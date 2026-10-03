@@ -25,10 +25,10 @@ GH = "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/{}.png"
 
 # Headed groups: (title, 20 characters at most; y; height) in Base, full width.
 # Links first (apps, monitoring and network, servers), then the live panels below them.
-# Base positions are written in 12-column units; SCALE turns them into the real grid. Homarr 2's
-# cells are square, so one row is as tall as a column is wide: at 24 columns (SCALE 2) a row is
-# half as tall, which lets a row of small boxes (Backups & jobs) be half a 12-column row high.
-SCALE = 2
+# Base positions are written in 12-column units; SCALE turns them into the real grid. SCALE 2
+# (24 columns) was tried on 2026-10-03 and dropped: Homarr zooms a 24-column board to a third,
+# and widgets that do not compensate (app names, Uptime Kuma, Paperless) became unreadable.
+SCALE = 1
 
 
 def g(v):
@@ -37,13 +37,20 @@ def g(v):
 
 
 # Headed groups top to bottom, below the top row (2 high): (title, height), 12-column units.
-GROUPS = [("Apps", 1), ("Monitoring & network", 1), ("Infrastructure", 1), ("Servers", 2.5), ("Backups & jobs", 1),
+# "Overview" (clock, weather, Uptime Kuma, Pi-hole) is a container with no heading: every row is
+# then a container with the same inner grid, so card edges line up across the board (a container's
+# grid is narrower than the plain section's, which left the top row 10px wider).
+UNLABELLED = {"Overview"}
+# Mobile heights that must be at least this (rows), e.g. five server cards stacked two by two.
+# Anything below a container that grows moves down by the same amount.
+MOBILE_MIN = {"Servers": 4}
+GROUPS = [("Overview", 2), ("Apps", 1), ("Monitoring & network", 1), ("Infrastructure", 1), ("Servers", 3), ("Backups & jobs", 1),
           ("Host history", 4), ("Containers & updates", 6), ("Documents & notes", 3)]
-TOP_ROW = 2
-# Desktop layouts: Base (from 768px) and Wide (from 1680px), the same except these heights.
-# Rows grow with the screen, so on a wide screen the one-line Backups & jobs boxes fit half a row.
-WIDE = {"name": "Wide", "breakpoint": 1680}
-HEIGHTS = {"Wide": {"Backups & jobs": 0.5}}
+TOP_ROW = 0
+# Extra desktop layouts (Homarr 2 breakpoints) and the heights where they differ from Base. None:
+# a "Wide" layout with a half-height Backups & jobs row needed the 24-column grid (see SCALE).
+EXTRA_LAYOUTS = []
+HEIGHTS = {}
 
 
 def group_y(layout_name):
@@ -99,7 +106,7 @@ RAIL_COLUMNS = 0
 NO_TITLE = {"title": None, "customCssClasses": [], "borderColor": ""}
 # Custom widgets (../widgets/*.json, deployed by widgets.py):
 #   name: (group, x, y, width, height or {layout: height}, height on Mobile)
-WIDGETS = {"Backups": ("Backups & jobs", 0, 0, 12, {"Base": 1, "Wide": 0.5}, 2)}
+WIDGETS = {"Backups": ("Backups & jobs", 0, 0, 12, 1, 2)}
 
 
 def history(system_id):
@@ -119,10 +126,15 @@ for lay in layouts:
         print(f"{lay['name']} layout: {lay['columnCount']} columns -> {COLS}")
         lay.update(columnCount=COLS, rightGutterColumnCount=RAIL_COLUMNS, leftGutterColumnCount=0)
         want_layouts = True
-if not any(lay["name"] == WIDE["name"] for lay in layouts):
-    print(f"new layout {WIDE['name']} from {WIDE['breakpoint']}px")
-    layouts.append({"id": nid(), "name": WIDE["name"], "columnCount": COLS, "leftGutterColumnCount": 0,
-                    "rightGutterColumnCount": RAIL_COLUMNS, "breakpoint": WIDE["breakpoint"], "role": "custom"})
+for extra in EXTRA_LAYOUTS:
+    if not any(lay["name"] == extra["name"] for lay in layouts):
+        print(f"new layout {extra['name']} from {extra['breakpoint']}px")
+        layouts.append({"id": nid(), "name": extra["name"], "columnCount": COLS, "leftGutterColumnCount": 0,
+                        "rightGutterColumnCount": RAIL_COLUMNS, "breakpoint": extra["breakpoint"], "role": "custom"})
+        want_layouts = True
+for lay in [lay for lay in layouts if lay["role"] == "custom" and lay["name"] not in {e["name"] for e in EXTRA_LAYOUTS}]:
+    print(f"remove layout {lay['name']}")
+    layouts.remove(lay)
     want_layouts = True
 if want_layouts and not DRY:
     mutate("board.saveLayouts", {"id": b["id"], "layouts": layouts})
@@ -177,6 +189,7 @@ def mobile_slot(section_id, height):
 
 sections = [s for s in b["sections"] if s["kind"] == "empty"]
 cid = {}
+overview_mobile = {}
 for title, _ in GROUPS:
     s = by_title.get(title)
     if not s:
@@ -184,12 +197,39 @@ for title, _ in GROUPS:
         s = {"id": nid(), "kind": "container", "collapsed": False, "layouts": [],
              "options": {"title": title, "customCssClasses": ["hl-group"], "borderColor": "", "showLabel": True,
                          "collapsible": False, "showOpenAll": False, "scrollable": False}}
-    mob = [lay for lay in s["layouts"] if lay["layoutId"] == MOBILE] or [
-        {"layoutId": MOBILE, "parentSectionId": top, "xOffset": 0, "yOffset": mobile_slot(top, 6), "width": 3, "height": 6}]
+    s["options"]["showLabel"] = title not in UNLABELLED
+    mob = [lay for lay in s["layouts"] if lay["layoutId"] == MOBILE]
+    if not mob and title == "Overview":
+        # On Mobile it takes the space its four widgets already use at the top of the board
+        tops = [lay for i in b["items"] if i["kind"] in ("clock", "weather", "uptimeKuma", "dnsHoleSummary")
+                for lay in i["layouts"] if lay["layoutId"] == MOBILE and lay["sectionId"] == top]
+        y0 = min((lay["yOffset"] for lay in tops), default=0)
+        overview_mobile = {"y0": y0}
+        mob = [{"layoutId": MOBILE, "parentSectionId": top, "xOffset": 0, "yOffset": y0, "width": 3,
+                "height": max((lay["yOffset"] + lay["height"] for lay in tops), default=y0 + 6) - y0}]
+    mob = mob or [{"layoutId": MOBILE, "parentSectionId": top, "xOffset": 0, "yOffset": mobile_slot(top, 6), "width": 3, "height": 6}]
     s["layouts"] = [{"layoutId": lid, "parentSectionId": top, "xOffset": 0, "yOffset": g(group_y(name)[title][0]),
                      "width": g(12), "height": g(group_y(name)[title][1])} for lid, name in DESKTOP] + mob
     cid[title] = s["id"]
     sections.append(s)
+
+# Mobile minimum heights: grow the container, then move whatever is below it down to match
+for title, rows in MOBILE_MIN.items():
+    s = next(x for x in sections if x.get("options", {}).get("title") == title)
+    mob = next(lay for lay in s["layouts"] if lay["layoutId"] == MOBILE)
+    grow = rows - mob["height"]
+    if grow > 0:
+        changes.append(f"Mobile: {title} {mob['height']} -> {rows} rows")
+        for other in sections:
+            for lay in other.get("layouts", []):
+                if lay["layoutId"] == MOBILE and lay.get("parentSectionId") == top and lay["yOffset"] > mob["yOffset"]:
+                    lay["yOffset"] += grow
+        for it in b["items"]:
+            for lay in it["layouts"]:
+                if lay["layoutId"] == MOBILE and lay["sectionId"] == top and lay["yOffset"] > mob["yOffset"]:
+                    lay["yOffset"] += grow
+        mob["height"] = rows
+        MOBILE_GROWN = globals().setdefault("MOBILE_GROWN", {}); MOBILE_GROWN[s["id"]] = rows
 
 # 3. Items: tiles from apps.toml, the widgets; anything else on the board is kept where it is
 items = []
@@ -224,6 +264,15 @@ for name, w in custom.items():
                       "options": {"definitionId": w["id"], "configuration": {}, "configurationVersion": 0}})
 
 
+def overview(it, x):
+    """A top-row widget in the Overview container; on Mobile it keeps its place, now inside it."""
+    for lay in it["layouts"]:
+        if lay["layoutId"] == MOBILE and lay["sectionId"] == top:
+            lay["sectionId"] = cid["Overview"]
+            lay["yOffset"] -= overview_mobile.get("y0", 0)
+    place(it, cid["Overview"], x, 0, 3, 2)
+
+
 def place(it, section, x, y, w, h):
     """Position in every desktop layout, in 12-column units (h may be {layout: height}); Mobile keeps
     its own, or gets the next free row."""
@@ -246,16 +295,19 @@ for it in items:
         w = 12 // len(tiles[group])
         place(it, cid[group], tiles[group].index(name) * w, 0, w, 1)
     elif k == "clock":
-        place(it, top, 0, 0, 3, 2)
+        overview(it, 0)
     elif k == "weather":
-        place(it, top, 3, 0, 3, 2)
+        overview(it, 3)
     elif k == "uptimeKuma":
-        place(it, top, 6, 0, 3, 2)
+        overview(it, 6)
     elif k == "dnsHoleSummary":
-        place(it, top, 9, 0, 3, 2)
+        overview(it, 9)
     elif k == "beszelSystemGrid":
         it["options"] = it["options"] or dict(SERVER_GRID)  # defaults for a new widget; your edits in Homarr stay
-        place(it, cid["Servers"], 0, 0, 12, 2.5)
+        place(it, cid["Servers"], 0, 0, 12, 3)
+        for lay in it["layouts"]:
+            if lay["layoutId"] == MOBILE:
+                lay["height"] = max(lay["height"], MOBILE_MIN["Servers"])
     elif k == "beszelSystemStats":
         place(it, cid["Host history"], list(HOST_HISTORY.values()).index(it["options"]["systemId"]) * 6, 0, 6, 4)
     elif k == "dockerContainers":
@@ -277,6 +329,19 @@ for it in items:
     elif k == "notebook":
         place(it, cid["Documents & notes"], 6, 0, 6, 3)
     # any other item (added by hand in Homarr) keeps its layouts as they are
+
+# Mobile: each container exactly as tall as what it holds, stacked in the desktop order
+y = 0
+for title, _ in GROUPS:
+    s_ = next(x for x in sections if x.get("options", {}).get("title") == title)
+    mob = next(lay for lay in s_["layouts"] if lay["layoutId"] == MOBILE)
+    inside = [lay["yOffset"] + lay["height"] for it in items for lay in it["layouts"]
+              if lay["layoutId"] == MOBILE and lay["sectionId"] == s_["id"]]
+    height = max(inside) if inside else mob["height"]
+    if (mob["yOffset"], mob["height"]) != (y, height):
+        changes.append(f"Mobile: {title} at row {y}, {height} high")
+    mob.update(yOffset=y, xOffset=0, height=height)
+    y += height
 
 print("\n".join(changes) or "apps and tiles already match apps.toml")
 if DRY:
