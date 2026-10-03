@@ -87,8 +87,8 @@ The quick way, on the Mac, replaces its update button:
 ./check-updates.sh      # the full list, majors included ("major: y" = read the notes first)
 ```
 
-A major jump is marked `MAJOR` before it asks: read the upgrade notes first (SQL Server and
-Homarr change their data on first start, so copy `data/` aside too). To do it by hand:
+A major jump is marked `MAJOR` before it asks: read the upgrade notes first (SQL Server upgrades
+its data files on first start, and any major may, so copy `data/` aside too). To do it by hand:
 
 SQL Server 2025 upgrades database files on first start and cannot be rolled back by changing
 the tag: copy `sqlserver/data` aside (container stopped) before any major SQL Server update.
