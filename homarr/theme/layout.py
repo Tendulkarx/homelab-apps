@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Lay out the Homelab board. Run on prdsrv1 next to homarr_session.py (see README.md).
+"""Lay out the Homelab board. Run on the Mac from this folder (see README.md); Touch ID once.
 
 One plain section holds everything. Headed groups are Homarr "dynamic" sections: titled frames
 that never collapse. Every service is an app tile in the same compact style (name left, icon

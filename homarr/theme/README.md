@@ -24,9 +24,9 @@ opacity, corner radius, `>_` logo from `logo.svg` as logo and favicon):
   one card per machine), Host history (Beszel charts for prx1 and prx2, 24 hours), Containers &
   updates (containers on all three hosts and a Releases list of everything homelab-apps pins),
   Documents & notes. Releases uses Docker Hub where a project publishes there; only Homarr and
-  Arcane come from GitHub, as anonymous GitHub allows 60 requests an hour. It imports `homarr_session.py`, which signs in with the Homarr login
-  copied from 1Password (`Homelab - Homarr`, vault **Development**) to `~/.homarr-setup/login.json` on prdsrv1;
-  delete that file afterwards. The host history charts name their machines by Beszel system
+  Arcane come from GitHub, as anonymous GitHub allows 60 requests an hour. It imports `homarr_session.py`, which reads the Homarr API key from
+  1Password (`homelab-homarr-api`, vault **Development**; Touch ID once) and sends it as the `ApiKey`
+  header, so no password or key file is needed. Run the scripts on the Mac from this folder. The host history charts name their machines by Beszel system
   id (`HOST_HISTORY`), which changes if the Beszel hub is rebuilt from nothing.
 
 The Beszel integration (Management > Integrations) is not made by `build-board.py`: it was

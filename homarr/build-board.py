@@ -3,8 +3,7 @@
 
 Only needed to rebuild Homarr from nothing (a restored db.sqlite plus SECRET_ENCRYPTION_KEY already
 has everything). First make ~/.homarr-setup (mode 700) holding, each written server to server so
-nothing is shown:
-  api-key           a Homarr API key (Management > Tools > API > Authentication)
+nothing is shown (the Homarr API key comes from 1Password, `homelab-homarr-api`):
   prx1-token.json   `pveum user token add homarr@pve dash --privsep 0 --output-format json` on prx1
   prx2-token.json   the same on prx2 (user homarr@pve with role PVEAuditor on /)
   pihole-password   PIHOLE_WEBPASSWORD from prdsrv2's pihole/.env
@@ -22,7 +21,10 @@ import urllib.request
 
 BASE = "https://dash.example.com"
 SETUP = os.path.expanduser("~/.homarr-setup")
-KEY = open(f"{SETUP}/api-key").read().strip()
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "theme"))
+from homarr_session import api_key  # noqa: E402  (1Password, homelab-homarr-api)
+
+KEY = api_key()
 CTX = ssl.create_default_context()
 ICON = "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/{}.svg"
 
