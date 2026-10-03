@@ -1,7 +1,10 @@
 # Homarr theme and layout
 
-Two looks for the Homelab board; `apply_theme.py <name>` switches between them (CSS, colours,
-opacity, corner radius, `>_` logo from `logo.svg` as logo and favicon):
+Two looks; `apply_theme.py <name>` switches between them. Since Homarr 2 it sets the instance
+branding, so the look covers every page including sign-in: name "Homelab", the `>_` logo
+(`logo.svg`, uploaded once to Homarr's media store as `homelab-logo.svg`) as logo and favicon,
+colours, corner style, and the theme as global CSS. The board keeps opacity and radius and no
+CSS of its own, so the theme lives in one place. Run it on the Mac (Touch ID once):
 
 - **glazzed** (current, from 2026-09-30): after the Glazzed admin theme, with subtle rounded
   corners (panels 8 px, section frames 10 px, inner boxes 6 px, buttons and badges 4-5 px).

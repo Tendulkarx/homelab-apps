@@ -46,3 +46,16 @@ def mutate(proc, inp):
         return json.load(opener.open(req))
     except urllib.error.HTTPError as e:
         raise SystemExit(f"{proc}: HTTP {e.code} {e.read().decode()[:400]}")
+
+
+def upload(name, content, content_type):
+    """Upload one file to Homarr's media store; returns its id (served at /api/user-medias/<id>)."""
+    boundary = "----homelab" + "".join(f"{b:02x}" for b in __import__("os").urandom(8))
+    body = (f"--{boundary}\r\nContent-Disposition: form-data; name=\"files\"; filename=\"{name}\"\r\n"
+            f"Content-Type: {content_type}\r\n\r\n").encode() + content + f"\r\n--{boundary}--\r\n".encode()
+    req = urllib.request.Request(BASE + "/api/trpc/media.uploadMedia", data=body,
+                                 headers={**_headers, "Content-Type": f"multipart/form-data; boundary={boundary}"})
+    try:
+        return json.load(opener.open(req))["result"]["data"]["json"][0]
+    except urllib.error.HTTPError as e:
+        raise SystemExit(f"upload {name}: HTTP {e.code} {e.read().decode()[:400]}")
