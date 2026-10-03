@@ -29,7 +29,7 @@ CSS of its own, so the theme lives in one place. Run it on the Mac (Touch ID onc
 - `../widgets/*.json` + `widgets.py`: custom widgets (Homarr 2 Custom JSX). `widgets.py` previews
   each one, runs every query against the real service (Homarr's required evidence) and saves it;
   `layout.py` places it (WIDGETS). Sources name saved integrations, so the files hold no ids or
-  secrets. **Backups & jobs** (its own row under Servers; eight cards, four a row, two on a phone): the last Proxmox backup of
+  secrets. **Backups & jobs** (one grid row under Servers; eight small cards in a row, two a row on a phone): the last Proxmox backup of
   each machine from the task log (Homarr's Proxmox user is read-only, which cannot list backup
   files, but can read tasks), and the last heartbeat of the dump, off-site and property-search
   push monitors from Uptime Kuma's homelab status page. It shows times and OK/Failed; Homarr gives

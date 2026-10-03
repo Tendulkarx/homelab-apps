@@ -26,8 +26,8 @@ GH = "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/{}.png"
 # Headed groups: (title, 20 characters at most; y; height) in Base, full width.
 # Links first (apps, monitoring and network, servers), then the live panels below them.
 GROUPS = [("Apps", 2, 1), ("Monitoring & network", 3, 1), ("Infrastructure", 4, 1),
-          ("Servers", 5, 3), ("Backups & jobs", 8, 2), ("Host history", 10, 4), ("Containers & updates", 14, 6),
-          ("Documents & notes", 20, 3)]
+          ("Servers", 5, 3), ("Backups & jobs", 8, 1), ("Host history", 9, 4), ("Containers & updates", 13, 6),
+          ("Documents & notes", 19, 3)]
 
 
 def nid():
@@ -73,7 +73,7 @@ RAIL_COLUMNS = 0
 NO_TITLE = {"title": None, "customCssClasses": [], "borderColor": ""}
 # Custom widgets (../widgets/*.json, deployed by widgets.py):
 #   name: (group, x, y, width, height, height on Mobile)
-WIDGETS = {"Backups": ("Backups & jobs", 0, 0, 12, 2, 2)}
+WIDGETS = {"Backups": ("Backups & jobs", 0, 0, 12, 1, 2)}
 
 
 def history(system_id):
