@@ -44,7 +44,8 @@ versions() {  # <image:tag>: every tag of the same shape (v prefix, number of pa
 
 newer_same_major() {  # <image:tag>: the newest tag in the same major version, if newer; else nothing
   local tag=${1##*:} all cur_major same
-  all=$(versions "$1") || return
+  all=$(versions "$1" || true)
+  [ -n "$all" ] || return 0
   cur_major=$(grep -oE '^[^0-9]*[0-9]+' <<<"$tag")
   same=$(grep -E "^${cur_major}([^0-9]|$)" <<<"$all" | tail -1)
   [ -n "$same" ] && [ "$same" != "$tag" ] && [ "$(printf '%s\n%s\n' "$tag" "$same" | sort -V | tail -1)" = "$same" ] && echo "$same"
