@@ -59,7 +59,7 @@ body {
 }
 
 /* ---- Panels: every widget card ------------------------------------------------------------ */
-.grid-stack-item-content.mantine-Card-root {
+.board-grid-item-content.mantine-Card-root {
   background-color: var(--gz-panel) !important;
   border: 1px solid var(--gz-line) !important;
   border-radius: var(--gz-r-lg) !important;
@@ -68,7 +68,7 @@ body {
   box-shadow: 0 10px 30px rgba(8, 12, 24, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
-.grid-stack-item-content.mantine-Card-root:hover {
+.board-grid-item-content.mantine-Card-root:hover {
   border-color: rgba(45, 140, 240, 0.50) !important;
   box-shadow: 0 12px 34px rgba(45, 140, 240, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.07) !important;
 }
@@ -84,14 +84,8 @@ body {
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
 }
-/* A section's inner grid pads its items by the same 10px gutter the page grid already adds, which
-   indented section cards 10px on each side. Pulling the inner grid out by one gutter puts their
-   edges on the same columns as the top row. */
-.hl-group .grid-stack {
-  margin-left: -10px !important;
-  margin-right: -10px !important;
-  width: auto !important;
-}
+/* Homarr 1.x needed the section's inner grid pulled out by one gutter to line up with the top
+   row; Homarr 2's containers inset their grid themselves, so that rule is gone. */
 .hl-group > .mantine-Badge-root {
   top: -14px !important;
   left: 4px !important;
@@ -122,8 +116,8 @@ body {
    machine. Its own card goes clear, like a section frame, and each machine's card takes the panel
    glass and hover of every other item, with the page's 20px gutter between them. Its built-in
    hover was a grey wash, and the blue edge lit up the whole row at once. */
-.beszelSystemGrid-wrapper.grid-stack-item-content.mantine-Card-root,
-.beszelSystemGrid-wrapper.grid-stack-item-content.mantine-Card-root:hover {
+.beszelSystemGrid-wrapper.board-grid-item-content.mantine-Card-root,
+.beszelSystemGrid-wrapper.board-grid-item-content.mantine-Card-root:hover {
   background: transparent !important;
   border: 0 !important;
   box-shadow: none !important;
@@ -154,9 +148,39 @@ body {
   font-weight: 400 !important;
 }
 
+/* ---- Host history (Beszel system stats): charts fit their card ----------------------------- */
+/* Homarr 2.0.0 works out these charts' height from the card height times the board's zoom (1.49
+   at 1728px wide), so they came out half again too tall and the bottom row fell outside the card.
+   Its gaps and titles scale with the zoom too, so no fixed height fits every screen. Instead the
+   chart grid fills the card, its rows share the height equally, and each chart takes what its
+   row has left after the title: a flex layout that fits at any width. */
+.beszelSystemStats-wrapper .mantine-ScrollArea-content,
+.beszelSystemStats-wrapper .mantine-ScrollArea-content > .mantine-Stack-root {
+  height: 100%;
+}
+.beszelSystemStats-wrapper .mantine-SimpleGrid-root {
+  flex: 1 1 0;
+  min-height: 0;
+  grid-auto-rows: minmax(0, 1fr);
+}
+/* Homarr drops to one column below 600px of card, stacking four thin strips; two columns
+   still read well down to a 380px card (phones keep one). */
+@container (min-width: 380px) {
+  .beszelSystemStats-wrapper .mantine-SimpleGrid-root { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+}
+.beszelSystemStats-wrapper .mantine-SimpleGrid-root > .mantine-Stack-root { min-height: 0; }
+/* The y-axis numbers ("16.0%", "30MB/s") hang left of each chart; in the left column that is the card's
+   edge, which cut them off. Padding in em grows with the zoom, as the numbers do. */
+.beszelSystemStats-wrapper .mantine-SimpleGrid-root { padding-left: 3.8em; }
+.beszelSystemStats-wrapper .mantine-SimpleGrid-root > .mantine-Stack-root > [class*="Chart-root"] {
+  flex: 1 1 0;
+  height: auto !important;
+  min-height: 48px !important;
+}
+
 /* Widget titles: hidden. They overlapped content, and each widget already names itself
    (Proxmox panels show the host, the container table has a Host column). */
-.grid-stack-item > .mantine-Badge-root { display: none !important; }
+.mantine-Badge-root[class*="widget-card-shell-module"][class*="__title"] { display: none !important; }
 
 /* ---- Insets: boxes inside widgets (stat tiles, Pi-hole summary, node lists) --------------- */
 [class*="__statTile"],

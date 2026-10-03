@@ -34,6 +34,12 @@ added by hand with Beszel's read-only `homarr` user (its password is in 1Passwor
 Development). On a Homarr rebuilt from nothing, add it
 again, named `Beszel`, before running `layout.py`.
 
+Homarr 2 (2026-10-03): gridstack is gone, so widget cards are `.board-grid-item-content` and dynamic
+sections became containers (they keep `hl-group`). 2.0.0 also sizes the Beszel history charts from
+the card height times the board zoom (1.49 at 1728px), so they overflowed; `glazzed.css` lays them
+out with flex instead (rows share the card, two columns from a 380px card, room on the left for
+the axis numbers). Checked with headless Chrome at 430 to 2560px: every chart inside its card.
+
 Homarr quirk: a category is open when its per-user `collapsed` value is `true` (the component
 treats it as "opened"), so `section.changeCollapsed` with `collapsed: true` expands it.
 Screenshots were taken with headless Chrome (puppeteer-core) using a session cookie.
