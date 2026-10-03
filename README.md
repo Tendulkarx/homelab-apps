@@ -82,10 +82,13 @@ The quick way, on the Mac, replaces its update button:
 ./update.sh             # every same-major update: asks once, then bumps, commits, pushes,
                         # backs up each host, pulls and recreates the apps (Caddy last)
 ./update.sh n8n         # just one app
+./update.sh homarr=v2.0.0   # an exact version, newer or older (it checks the tag exists)
+./update.sh --major homarr  # the newest release, even a new major version
 ./check-updates.sh      # the full list, majors included ("major: y" = read the notes first)
 ```
 
-`update.sh` never takes a major version. For those, and to do it by hand:
+A major jump is marked `MAJOR` before it asks: read the upgrade notes first (SQL Server and
+Homarr change their data on first start, so copy `data/` aside too). To do it by hand:
 
 SQL Server 2025 upgrades database files on first start and cannot be rolled back by changing
 the tag: copy `sqlserver/data` aside (container stopped) before any major SQL Server update.
