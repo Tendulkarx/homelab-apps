@@ -86,9 +86,12 @@ body {
 }
 /* Homarr 1.x needed the section's inner grid pulled out by one gutter to line up with the top
    row; Homarr 2's containers inset their grid themselves, so that rule is gone. */
+/* Section headings sit on the board canvas, which Homarr 2 zooms to fit the screen (to a third at
+   24 columns), so a plain 14px heading came out about 5px. Multiplying by the canvas's inverse
+   zoom gives a true 14px at every width. */
 .hl-group > .mantine-Badge-root {
-  top: -14px !important;
-  left: 4px !important;
+  top: calc(-14px * var(--board-canvas-inverse-scale, 1)) !important;
+  left: calc(4px * var(--board-canvas-inverse-scale, 1)) !important;
   height: auto !important;
   padding: 0 !important;
   border: 0 !important;
@@ -103,8 +106,8 @@ body {
 .hl-group > .mantine-Badge-root .mantine-Badge-label {
   font-family: 'Open Sans', sans-serif !important;
   font-weight: 400 !important;
-  font-size: 14px !important;
-  line-height: 18px !important;
+  font-size: calc(14px * var(--board-canvas-inverse-scale, 1)) !important;
+  line-height: calc(18px * var(--board-canvas-inverse-scale, 1)) !important;
   letter-spacing: 0.02em !important;
   text-transform: none !important;
   color: rgba(255, 255, 255, 0.88) !important;

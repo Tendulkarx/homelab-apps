@@ -25,9 +25,35 @@ GH = "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/{}.png"
 
 # Headed groups: (title, 20 characters at most; y; height) in Base, full width.
 # Links first (apps, monitoring and network, servers), then the live panels below them.
-GROUPS = [("Apps", 2, 1), ("Monitoring & network", 3, 1), ("Infrastructure", 4, 1),
-          ("Servers", 5, 3), ("Backups & jobs", 8, 1), ("Host history", 9, 4), ("Containers & updates", 13, 6),
-          ("Documents & notes", 19, 3)]
+# Base positions are written in 12-column units; SCALE turns them into the real grid. Homarr 2's
+# cells are square, so one row is as tall as a column is wide: at 24 columns (SCALE 2) a row is
+# half as tall, which lets a row of small boxes (Backups & jobs) be half a 12-column row high.
+SCALE = 2
+
+
+def g(v):
+    """12-column units to grid cells."""
+    return int(round(v * SCALE))
+
+
+# Headed groups top to bottom, below the top row (2 high): (title, height), 12-column units.
+GROUPS = [("Apps", 1), ("Monitoring & network", 1), ("Infrastructure", 1), ("Servers", 2.5), ("Backups & jobs", 1),
+          ("Host history", 4), ("Containers & updates", 6), ("Documents & notes", 3)]
+TOP_ROW = 2
+# Desktop layouts: Base (from 768px) and Wide (from 1680px), the same except these heights.
+# Rows grow with the screen, so on a wide screen the one-line Backups & jobs boxes fit half a row.
+WIDE = {"name": "Wide", "breakpoint": 1680}
+HEIGHTS = {"Wide": {"Backups & jobs": 0.5}}
+
+
+def group_y(layout_name):
+    """Each group's (y, height) in one desktop layout, stacked top to bottom."""
+    out, y = {}, TOP_ROW
+    for title, h in GROUPS:
+        h = HEIGHTS.get(layout_name, {}).get(title, h)
+        out[title] = (y, h)
+        y += h
+    return out
 
 
 def nid():
@@ -72,8 +98,8 @@ HOST_HISTORY = {"prx1": "03hzcypegtkki1k", "prx2": "ovs2248dq83evvn"}
 RAIL_COLUMNS = 0
 NO_TITLE = {"title": None, "customCssClasses": [], "borderColor": ""}
 # Custom widgets (../widgets/*.json, deployed by widgets.py):
-#   name: (group, x, y, width, height, height on Mobile)
-WIDGETS = {"Backups": ("Backups & jobs", 0, 0, 12, 1, 2)}
+#   name: (group, x, y, width, height or {layout: height}, height on Mobile)
+WIDGETS = {"Backups": ("Backups & jobs", 0, 0, 12, {"Base": 1, "Wide": 0.5}, 2)}
 
 
 def history(system_id):
@@ -85,17 +111,24 @@ def history(system_id):
 login()
 spec = tomllib.loads((Path(__file__).resolve().parent.parent / "apps.toml").read_text())
 b = query("board.getBoardByName", {"name": "Homelab"})
-base_layout = next(lay for lay in b["layouts"] if lay["role"] == "base")
-if (base_layout["columnCount"], base_layout["rightGutterColumnCount"]) != (12 + RAIL_COLUMNS, RAIL_COLUMNS):
-    print(f"Base layout: {base_layout['columnCount']} columns -> {12 + RAIL_COLUMNS}, sidebar {base_layout['rightGutterColumnCount']} -> {RAIL_COLUMNS}")
-    if not DRY:
-        layouts = [dict(lay) for lay in b["layouts"]]
-        for lay in layouts:
-            if lay["role"] == "base":
-                lay.update(columnCount=12 + RAIL_COLUMNS, rightGutterColumnCount=RAIL_COLUMNS, leftGutterColumnCount=0)
-        mutate("board.saveLayouts", {"id": b["id"], "layouts": layouts})
-        b = query("board.getBoardByName", {"name": "Homelab"})
+COLS = 12 * SCALE + RAIL_COLUMNS
+layouts = [dict(lay) for lay in b["layouts"]]
+want_layouts = False
+for lay in layouts:
+    if lay["role"] in ("base", "custom") and (lay["columnCount"], lay["rightGutterColumnCount"]) != (COLS, RAIL_COLUMNS):
+        print(f"{lay['name']} layout: {lay['columnCount']} columns -> {COLS}")
+        lay.update(columnCount=COLS, rightGutterColumnCount=RAIL_COLUMNS, leftGutterColumnCount=0)
+        want_layouts = True
+if not any(lay["name"] == WIDE["name"] for lay in layouts):
+    print(f"new layout {WIDE['name']} from {WIDE['breakpoint']}px")
+    layouts.append({"id": nid(), "name": WIDE["name"], "columnCount": COLS, "leftGutterColumnCount": 0,
+                    "rightGutterColumnCount": RAIL_COLUMNS, "breakpoint": WIDE["breakpoint"], "role": "custom"})
+    want_layouts = True
+if want_layouts and not DRY:
+    mutate("board.saveLayouts", {"id": b["id"], "layouts": layouts})
+    b = query("board.getBoardByName", {"name": "Homelab"})
 BASE = next(lay["id"] for lay in b["layouts"] if lay["role"] == "base")
+DESKTOP = [(lay["id"], "Base" if lay["role"] == "base" else lay["name"]) for lay in b["layouts"] if lay["role"] != "mobile"]
 MOBILE = next(lay["id"] for lay in b["layouts"] if lay["role"] == "mobile")
 top = next(s for s in b["sections"] if s["kind"] == "empty" and s.get("xOffset", 0) == 0)["id"]
 ints = {i["name"]: i["id"] for i in query("integration.all")}
@@ -144,7 +177,7 @@ def mobile_slot(section_id, height):
 
 sections = [s for s in b["sections"] if s["kind"] == "empty"]
 cid = {}
-for title, y, h in GROUPS:
+for title, _ in GROUPS:
     s = by_title.get(title)
     if not s:
         changes.append(f"new container {title}")
@@ -153,7 +186,8 @@ for title, y, h in GROUPS:
                          "collapsible": False, "showOpenAll": False, "scrollable": False}}
     mob = [lay for lay in s["layouts"] if lay["layoutId"] == MOBILE] or [
         {"layoutId": MOBILE, "parentSectionId": top, "xOffset": 0, "yOffset": mobile_slot(top, 6), "width": 3, "height": 6}]
-    s["layouts"] = [{"layoutId": BASE, "parentSectionId": top, "xOffset": 0, "yOffset": y, "width": 12, "height": h}] + mob
+    s["layouts"] = [{"layoutId": lid, "parentSectionId": top, "xOffset": 0, "yOffset": g(group_y(name)[title][0]),
+                     "width": g(12), "height": g(group_y(name)[title][1])} for lid, name in DESKTOP] + mob
     cid[title] = s["id"]
     sections.append(s)
 
@@ -191,9 +225,15 @@ for name, w in custom.items():
 
 
 def place(it, section, x, y, w, h):
+    """Position in every desktop layout, in 12-column units (h may be {layout: height}); Mobile keeps
+    its own, or gets the next free row."""
+    hs = h if isinstance(h, dict) else {}
+    base_h = hs.get("Base", h if not isinstance(h, dict) else 1)
+    mh = max(1, int(round(base_h)))
     mob = [lay for lay in it["layouts"] if lay["layoutId"] == MOBILE and lay["sectionId"] == section] or [
-        {"layoutId": MOBILE, "sectionId": section, "xOffset": 0, "yOffset": mobile_slot(section, h), "width": 3, "height": h}]
-    it["layouts"] = [{"layoutId": BASE, "sectionId": section, "xOffset": x, "yOffset": y, "width": w, "height": h}] + mob
+        {"layoutId": MOBILE, "sectionId": section, "xOffset": 0, "yOffset": mobile_slot(section, mh), "width": 3, "height": mh}]
+    it["layouts"] = [{"layoutId": lid, "sectionId": section, "xOffset": g(x), "yOffset": g(y), "width": g(w),
+                      "height": g(hs.get(name, base_h))} for lid, name in DESKTOP] + mob
 
 
 for it in items:
@@ -215,7 +255,7 @@ for it in items:
         place(it, top, 9, 0, 3, 2)
     elif k == "beszelSystemGrid":
         it["options"] = it["options"] or dict(SERVER_GRID)  # defaults for a new widget; your edits in Homarr stay
-        place(it, cid["Servers"], 0, 0, 12, 3)
+        place(it, cid["Servers"], 0, 0, 12, 2.5)
     elif k == "beszelSystemStats":
         place(it, cid["Host history"], list(HOST_HISTORY.values()).index(it["options"]["systemId"]) * 6, 0, 6, 4)
     elif k == "dockerContainers":
@@ -243,4 +283,4 @@ if DRY:
     print(f"(dry run: {len(sections)} sections, {len(items)} items, nothing saved)")
     sys.exit(0)
 mutate("board.saveBoard", {"id": b["id"], "sections": sections, "items": items})
-print(f"layout saved: {len(GROUPS)} groups, {len(items)} items; set the look with apply_theme.py")
+print(f"layout saved: {len(GROUPS)} groups, {len(items)} items, layouts {', '.join(n for _, n in DESKTOP)} and Mobile")

@@ -29,7 +29,7 @@ CSS of its own, so the theme lives in one place. Run it on the Mac (Touch ID onc
 - `../widgets/*.json` + `widgets.py`: custom widgets (Homarr 2 Custom JSX). `widgets.py` previews
   each one, runs every query against the real service (Homarr's required evidence) and saves it;
   `layout.py` places it (WIDGETS). Sources name saved integrations, so the files hold no ids or
-  secrets. **Backups & jobs** (one grid row under Servers; eight small cards in a row, two a row on a phone): the last Proxmox backup of
+  secrets. **Backups & jobs** (under Servers; eight one-line boxes in a row, two a row on a phone; hover a time for its date): the last Proxmox backup of
   each machine from the task log (Homarr's Proxmox user is read-only, which cannot list backup
   files, but can read tasks), and the last heartbeat of the dump, off-site and property-search
   push monitors from Uptime Kuma's homelab status page. It shows times and OK/Failed; Homarr gives
@@ -37,6 +37,12 @@ CSS of its own, so the theme lives in one place. Run it on the Mac (Touch ID onc
 - No sidebar: a right "rail" (Homarr 2) with a server table was tried on 2026-10-03 and dropped;
   Base is 12 columns. The owner's header adds a Docker button (apply_theme.py). The Statistics
   widget is not used: it shows hand-refreshed snapshots, and the live widgets do better.
+- Grid: Base and Wide are 24 columns (Homarr's maximum); layout.py writes positions in 12-column
+  units and doubles them (SCALE), which allows half rows. Homarr 2's cells are square, so rows grow
+  with the screen: Wide (from 1680px) gives Backups & jobs half a row, Base (768 to 1679px) a full
+  one, as half a row there is too short for even a one-line box. Servers is 2.5 rows, which keeps
+  Beszel's grid at five machines in one row (it picks columns from the card's shape). Section
+  headings are sized against the canvas zoom (`--board-canvas-inverse-scale`), a true 14px.
 - `layout.py`: the whole layout (Homarr 2: containers, Base and Mobile layouts; it sets Base and
   keeps Mobile's own positions; widget settings are defaults for new widgets only). A top row (clock, weather, Uptime Kuma, Pi-hole), then headed
   groups that never collapse (Homarr "dynamic" sections). First every link, one balanced row
