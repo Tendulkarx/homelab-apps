@@ -67,6 +67,12 @@ SERVER_GRID = {"statusFilter": "all", "showCpu": True, "showMemory": True, "show
 # Charts for the two physical hosts (Beszel system ids). A hub rebuilt from nothing gives every
 # machine a new id: read them from beszel.example.com (a system's page address) and update these.
 HOST_HISTORY = {"prx1": "03hzcypegtkki1k", "prx2": "ovs2248dq83evvn"}
+# Right sidebar (Homarr 2 "rail": stays put while the board scrolls; none on Mobile). The Base
+# layout is widened by the same number of columns, so the main board keeps its 12.
+RAIL_COLUMNS = 3
+RAIL_TABLE = {"sortBy": "name", "showCpu": True, "showMemory": True, "showDisk": True, "showGpu": False,
+              "showLoadAvg": False, "showNet": False, "showTemp": False, "showBattery": False, "showServices": False,
+              "showUptime": False, "showAgent": False, "columnOrder": "", "columnWidths": ""}
 NO_TITLE = {"title": None, "customCssClasses": [], "borderColor": ""}
 
 
@@ -79,9 +85,20 @@ def history(system_id):
 login()
 spec = tomllib.loads((Path(__file__).resolve().parent.parent / "apps.toml").read_text())
 b = query("board.getBoardByName", {"name": "Homelab"})
+base_layout = next(lay for lay in b["layouts"] if lay["role"] == "base")
+if (base_layout["columnCount"], base_layout["rightGutterColumnCount"]) != (12 + RAIL_COLUMNS, RAIL_COLUMNS):
+    print(f"Base layout: {base_layout['columnCount']} columns -> {12 + RAIL_COLUMNS}, right sidebar {RAIL_COLUMNS}")
+    if not DRY:
+        layouts = [dict(lay) for lay in b["layouts"]]
+        for lay in layouts:
+            if lay["role"] == "base":
+                lay.update(columnCount=12 + RAIL_COLUMNS, rightGutterColumnCount=RAIL_COLUMNS, leftGutterColumnCount=0)
+        mutate("board.saveLayouts", {"id": b["id"], "layouts": layouts})
+        b = query("board.getBoardByName", {"name": "Homelab"})
 BASE = next(lay["id"] for lay in b["layouts"] if lay["role"] == "base")
 MOBILE = next(lay["id"] for lay in b["layouts"] if lay["role"] == "mobile")
 top = next(s for s in b["sections"] if s["kind"] == "empty" and s.get("xOffset", 0) == 0)["id"]
+rail = next((s["id"] for s in b["sections"] if s["kind"] == "empty" and s.get("xOffset") == 1), None)
 ints = {i["name"]: i["id"] for i in query("integration.all")}
 
 # 1. Apps: create or update every app in apps.toml, so Homarr matches the file
@@ -154,7 +171,8 @@ for host, sid in HOST_HISTORY.items():
     if not any(i["kind"] == "beszelSystemStats" and i["options"].get("systemId") == sid for i in items):
         items.append({"id": nid(), "kind": "beszelSystemStats", "options": history(sid), "integrationIds": [ints["Beszel"]],
                       "advancedOptions": dict(NO_TITLE), "layouts": []})
-for kind, integration, opts in (("beszelSystemGrid", "Beszel", SERVER_GRID), ("releases", None, RELEASES)):
+for kind, integration, opts in (("beszelSystemGrid", "Beszel", SERVER_GRID), ("releases", None, RELEASES),
+                                ("beszelSystemTable", "Beszel", RAIL_TABLE)):
     if not any(i["kind"] == kind for i in items):
         items.append({"id": nid(), "kind": kind, "options": dict(opts), "integrationIds": [ints[integration]] if integration else [],
                       "advancedOptions": dict(NO_TITLE), "layouts": []})
@@ -194,6 +212,9 @@ for it in items:
         it["options"]["repositories"] = RELEASES["repositories"]  # the list follows homelab-apps; other settings stay
         it["options"] = {**RELEASES, **it["options"]}
         place(it, cid["Containers & updates"], 8, 0, 4, 6)
+    elif k == "beszelSystemTable" and rail:
+        it["options"] = it["options"] or dict(RAIL_TABLE)
+        it["layouts"] = [{"layoutId": BASE, "sectionId": rail, "xOffset": 0, "yOffset": 0, "width": RAIL_COLUMNS, "height": 2}]
     elif k == "paperlessNgx":
         place(it, cid["Documents & notes"], 0, 0, 6, 3)
     elif k == "notebook":

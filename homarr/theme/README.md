@@ -26,6 +26,11 @@ CSS of its own, so the theme lives in one place. Run it on the Mac (Touch ID onc
   creates or updates the apps in Homarr and places the tiles. Compose labels were considered and
   dropped: Homarr reads them only during first-time setup, most tiles are not containers, and
   the two Pi-holes share one compose file.
+- Right sidebar (Homarr 2 "rail", 3 columns, desktop only; stays put while the board scrolls):
+  Beszel's server table, CPU, memory and disk for every machine. The Base layout is 15 columns so
+  the main board keeps 12. The header (the owner's) adds a Docker button; set by apply_theme.py.
+  Statistics widget: not used. It shows hand-refreshed snapshots, the live Pi-hole and Uptime Kuma
+  widgets do better, and Caddy's figures would need its admin API opened to Homarr.
 - `layout.py`: the whole layout (Homarr 2: containers, Base and Mobile layouts; it sets Base and
   keeps Mobile's own positions; widget settings are defaults for new widgets only). A top row (clock, weather, Uptime Kuma, Pi-hole), then headed
   groups that never collapse (Homarr "dynamic" sections). First every link, one balanced row
