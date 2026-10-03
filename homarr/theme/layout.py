@@ -44,7 +44,7 @@ UNLABELLED = {"Overview"}
 # Mobile heights that must be at least this (rows), e.g. five server cards stacked two by two.
 # Anything below a container that grows moves down by the same amount.
 MOBILE_MIN = {"Servers": 4}
-GROUPS = [("Overview", 2), ("Apps", 1), ("Monitoring & network", 1), ("Infrastructure", 1), ("Servers", 3), ("Backups & jobs", 1),
+GROUPS = [("Overview", 2), ("Apps", 1), ("Monitoring & network", 1), ("Infrastructure", 1), ("Servers", 3), ("Backups & jobs", 2),
           ("Host history", 4), ("Containers & updates", 6), ("Documents & notes", 3)]
 TOP_ROW = 0
 # Extra desktop layouts (Homarr 2 breakpoints) and the heights where they differ from Base. None:
@@ -106,7 +106,7 @@ RAIL_COLUMNS = 0
 NO_TITLE = {"title": None, "customCssClasses": [], "borderColor": ""}
 # Custom widgets (../widgets/*.json, deployed by widgets.py):
 #   name: (group, x, y, width, height or {layout: height}, height on Mobile)
-WIDGETS = {"Backups": ("Backups & jobs", 0, 0, 12, 1, 2)}
+WIDGETS = {"Backups": ("Backups & jobs", 0, 0, 12, 2, 6)}
 
 
 def history(system_id):
