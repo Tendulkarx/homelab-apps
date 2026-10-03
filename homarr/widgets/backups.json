@@ -1,7 +1,7 @@
 {
   "$schema": "homarr-custom-widget-v2",
   "name": "Backups",
-  "description": "Last run of every backup job and scheduled job: Proxmox backups of each machine, database and app dumps, off-site copies, property-search.",
+  "description": "Last run of every backup job and scheduled job: Proxmox backups of each machine, database and app dumps, off-site copies, property-search. UK times; Proxmox nightly runs at 03:30 (prx1) and 02:30 (prx2).",
   "sources": {
     "default": {
       "type": "integration",
@@ -41,14 +41,10 @@
     }
   },
   "templateLines": [
-    "<Stack gap={8} p=\"sm\" h=\"100%\">",
-    "  <Group justify=\"space-between\" wrap=\"nowrap\">",
-    "    <Text size=\"xs\" c=\"dimmed\">Last run of each job, UK time. Proxmox nightly: prx1 03:30, prx2 02:30.</Text>",
-    "    <RefreshButton label=\"Refresh\" />",
-    "  </Group>",
-    "  <SimpleGrid cols={{ base: 2, sm: 4 }} spacing=\"xs\" verticalSpacing=\"xs\" style={{ flex: 1, gridAutoRows: \"1fr\" }}>",
+    "<Stack gap={6} p={6} h=\"100%\">",
+    "  <SimpleGrid cols={{ base: 2, sm: 4 }} spacing={6} verticalSpacing={6} style={{ flex: 1, gridAutoRows: \"1fr\" }}>",
     "  {[[\"prdsrv1\", \"Proxmox backup\", \"prx1\", \"100\"], [\"prdsrv2\", \"Proxmox backup\", \"prx1\", \"101\"], [\"prdsrv3\", \"Proxmox backup\", \"prx2\", \"102\"]].map(row =>",
-    "    <Paper key={row[0]} p=\"xs\" radius=\"sm\" withBorder style={{ minWidth: 0, display: \"flex\", alignItems: \"center\" }}>",
+    "    <Paper key={row[0]} px={8} py={4} radius=\"sm\" withBorder style={{ minWidth: 0, display: \"flex\", alignItems: \"center\" }}>",
     "      <Group justify=\"space-between\" wrap=\"nowrap\" gap=\"xs\" style={{ flex: 1, minWidth: 0 }}>",
     "        <Stack gap={0} style={{ minWidth: 0 }}>",
     "          <Text size=\"sm\" truncate>{row[0]} <Text span c=\"dimmed\" size=\"xs\">{row[1]}</Text></Text>",
@@ -57,8 +53,8 @@
     "        <Badge size=\"sm\" style={{ flexShrink: 0 }} color={(data[row[2]]?.data ?? []).find(task => task.id === row[3])?.status === \"OK\" ? \"green\" : (data[row[2]]?.data ?? []).find(task => task.id === row[3]) ? \"red\" : \"gray\"}>{(data[row[2]]?.data ?? []).find(task => task.id === row[3])?.status === \"OK\" ? \"OK\" : (data[row[2]]?.data ?? []).find(task => task.id === row[3]) ? \"Failed\" : \"None\"}</Badge>",
     "      </Group>",
     "    </Paper>)}",
-    "  {[[\"Database dumps\", \"prdsrv2\", \"14\"], [\"App dumps\", \"prdsrv1\", \"16\"], [\"Off-site copy\", \"prdsrv2\", \"15\"], [\"Off-site copy\", \"prdsrv1\", \"17\"], [\"property-search\", \"4× a day\", \"12\"]].map(row =>",
-    "    <Paper key={row[0] + row[1]} p=\"xs\" radius=\"sm\" withBorder style={{ minWidth: 0, display: \"flex\", alignItems: \"center\" }}>",
+    "  {[[\"Database dumps\", \"prdsrv2\", \"14\"], [\"App dumps\", \"prdsrv1\", \"16\"], [\"Off-site copy\", \"prdsrv2\", \"15\"], [\"Off-site copy\", \"prdsrv1\", \"17\"], [\"property-search\", \"4\u00d7 a day\", \"12\"]].map(row =>",
+    "    <Paper key={row[0] + row[1]} px={8} py={4} radius=\"sm\" withBorder style={{ minWidth: 0, display: \"flex\", alignItems: \"center\" }}>",
     "      <Group justify=\"space-between\" wrap=\"nowrap\" gap=\"xs\" style={{ flex: 1, minWidth: 0 }}>",
     "        <Stack gap={0} style={{ minWidth: 0 }}>",
     "          <Text size=\"sm\" truncate>{row[0]} <Text span c=\"dimmed\" size=\"xs\">{row[1]}</Text></Text>",
