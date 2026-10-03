@@ -21,7 +21,13 @@ CSS of its own, so the theme lives in one place. Run it on the Mac (Touch ID onc
 - **bluematrix**: the Ghostty terminal's Blue Matrix palette (`#101116`, `#00b0ff`, `#00ff9c`),
   rounded glass cards over a faint grid, JetBrains Mono headings. `bluematrix.css`.
 
-- `layout.py`: the whole layout. A top row (clock, weather, Uptime Kuma, Pi-hole), then headed
+- `../apps.toml`: every app tile, by group and in order (name, link, icon, status check,
+  description). Add or change a tile there, then `python3 layout.py` (`--dry-run` first): it
+  creates or updates the apps in Homarr and places the tiles. Compose labels were considered and
+  dropped: Homarr reads them only during first-time setup, most tiles are not containers, and
+  the two Pi-holes share one compose file.
+- `layout.py`: the whole layout (Homarr 2: containers, Base and Mobile layouts; it sets Base and
+  keeps Mobile's own positions; widget settings are defaults for new widgets only). A top row (clock, weather, Uptime Kuma, Pi-hole), then headed
   groups that never collapse (Homarr "dynamic" sections). First every link, one balanced row
   per group: Apps, Monitoring & network, Infrastructure. Then the live panels: Servers (Beszel,
   one card per machine), Host history (Beszel charts for prx1 and prx2, 24 hours), Containers &

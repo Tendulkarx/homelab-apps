@@ -1,0 +1,149 @@
+# Every app tile on the Homelab board, in order within its group. layout.py creates or updates
+# the apps in Homarr from this file and places the tiles (one balanced row per group), so a new
+# or changed tile is one edit here, then `python3 theme/layout.py` on the Mac.
+#   icon: a name from github.com/homarr-labs/dashboard-icons (svg), or a full https:// address
+#   ping: the address Homarr checks for the status dot; leave it out for no dot
+# An app listed under [[off_board]] is kept in Homarr (other links use it) but not shown.
+
+[[tile]]
+group = "Apps"
+name = "Paperless"
+href = "https://paperless.example.com"
+icon = "paperless-ngx"
+ping = "https://paperless.example.com"
+description = "Documents and OCR"
+
+[[tile]]
+group = "Apps"
+name = "n8n"
+href = "https://n8n.example.com"
+icon = "n8n"
+ping = "https://n8n.example.com"
+description = "Automation; runs property-search"
+
+[[tile]]
+group = "Apps"
+name = "Metabase"
+href = "https://metabase.example.com"
+icon = "metabase"
+ping = "https://metabase.example.com/api/health"
+description = "Reporting and dashboards"
+
+[[tile]]
+group = "Apps"
+name = "Logs"
+href = "https://logs.example.com"
+icon = "dozzle"
+ping = "https://logs.example.com"
+description = "Dozzle: container logs, all hosts"
+
+[[tile]]
+group = "Apps"
+name = "Arcane"
+href = "https://arcane.example.com"
+icon = "arcane"
+ping = "https://arcane.example.com"
+description = "Docker stacks on prdsrv1"
+
+[[tile]]
+group = "Apps"
+name = "GitHub"
+href = "https://github.com/Tendulkarx?tab=repositories"
+icon = "github"
+description = "proxmox-lab, homelab-apps, property-search"
+
+[[tile]]
+group = "Monitoring & network"
+name = "Uptime Kuma"
+href = "https://uptime.example.com"
+icon = "uptime-kuma"
+ping = "https://uptime.example.com"
+description = "Monitors and alerts"
+
+[[tile]]
+group = "Monitoring & network"
+name = "Status page"
+href = "https://uptime.example.com/status/homelab"
+icon = "uptime-kuma"
+description = "Every monitor on one page"
+
+[[tile]]
+group = "Monitoring & network"
+name = "Beszel"
+href = "https://beszel.example.com"
+icon = "beszel"
+ping = "https://beszel.example.com/api/health"
+description = "Resource history and alerts for every host"
+
+[[tile]]
+group = "Monitoring & network"
+name = "Alerts"
+href = "https://mail.google.com/mail/u/0/#label/Homelab"
+icon = "gmail"
+description = "Gmail label Homelab: every lab alert"
+
+[[tile]]
+group = "Monitoring & network"
+name = "UniFi"
+href = "https://10.69.1.1/network/default/dashboard"
+icon = "ubiquiti-unifi"
+description = "Network dashboard on the UDM SE"
+
+[[tile]]
+group = "Monitoring & network"
+name = "Cloudflare"
+href = "https://dash.cloudflare.com"
+icon = "cloudflare"
+description = "example.com DNS"
+
+[[tile]]
+group = "Infrastructure"
+name = "prx1"
+href = "https://prx1.example.com"
+icon = "proxmox"
+ping = "https://prx1.example.com"
+description = "Proxmox VE: prdsrv1, prdsrv2, tstsrv1"
+
+[[tile]]
+group = "Infrastructure"
+name = "prx2"
+href = "https://prx2.example.com"
+icon = "proxmox"
+ping = "https://prx2.example.com"
+description = "Proxmox VE: prdsrv3"
+
+[[tile]]
+group = "Infrastructure"
+name = "Backup Server"
+href = "https://10.69.20.131:8007"
+icon = "proxmox"
+description = "Proxmox Backup Server on prx2"
+
+[[tile]]
+group = "Infrastructure"
+name = "Off-site backups"
+href = "https://drive.google.com/drive/search?q=homelab-offsite"
+icon = "google-drive"
+description = "Encrypted nightly copies in Google Drive (03:00)"
+
+[[tile]]
+group = "Infrastructure"
+name = "Pi-hole"
+href = "https://pihole.example.com/admin"
+icon = "pi-hole"
+ping = "https://pihole.example.com/admin"
+description = "DNS and ad blocking (primary)"
+
+[[tile]]
+group = "Infrastructure"
+name = "Pi-hole 2"
+href = "https://pihole2.example.com/admin"
+icon = "pi-hole"
+ping = "https://pihole2.example.com/admin"
+description = "DNS and ad blocking (second, prdsrv3)"
+
+[[off_board]]
+name = "House Hunting"
+href = "https://metabase.example.com/dashboard/3"
+icon = "metabase"
+description = "property-search dashboard"
