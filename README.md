@@ -74,17 +74,24 @@ deploy key for this repo), then `git pull` on the Mac.
 ## Updating an app
 
 Images are pinned to exact versions, so nothing changes by surprise and rolling back is one
-line. To see what is out of date, run on the Mac:
+line. Arcane therefore shows no updates (it only spots a newer image under the same tag).
+The quick way, on the Mac, replaces its update button:
 
 ```bash
-./check-updates.sh      # "update: x" = newer in the same major; "major: y" = read the notes first
+./update.sh --dry-run   # what would change
+./update.sh             # every same-major update: asks once, then bumps, commits, pushes,
+                        # backs up each host, pulls and recreates the apps (Caddy last)
+./update.sh n8n         # just one app
+./check-updates.sh      # the full list, majors included ("major: y" = read the notes first)
 ```
+
+`update.sh` never takes a major version. For those, and to do it by hand:
 
 SQL Server 2025 upgrades database files on first start and cannot be rolled back by changing
 the tag: copy `sqlserver/data` aside (container stopped) before any major SQL Server update.
 
-Take a backup first (`make backup-vm HOST=10.69.20.130 VMID=101` in proxmox-lab), check the
-app's release notes, then:
+Take a backup first (`make backup NAME=<host>` in proxmox-lab), check the app's release notes,
+then:
 
 ```bash
 # change the tag in <app>/docker-compose.yml (Caddy: both FROM lines in caddy/Dockerfile)
