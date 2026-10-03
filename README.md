@@ -80,7 +80,9 @@ The quick way, on the Mac, replaces its update button:
 ```bash
 ./update.sh --dry-run   # what would change
 ./update.sh             # every same-major update: asks once, then bumps, commits, pushes,
-                        # backs up each host, pulls and recreates the apps (Caddy last)
+                        # backs up each host (prdsrv1/2 to the Backup Server on prx2 in
+                        # seconds; prdsrv3 to prx2's data), pulls and recreates the apps
+                        # (Caddy last), then deletes the images they replaced
 ./update.sh n8n         # just one app
 ./update.sh homarr=v2.0.0   # an exact version, newer or older (it checks the tag exists)
 ./update.sh --major homarr  # the newest release, even a new major version

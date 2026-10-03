@@ -7,12 +7,13 @@
 #   ./update.sh homarr=v2.0.0   an exact version (any version that exists, older or newer)
 #   ./update.sh --major homarr  the newest release, even a new major version
 #   ./update.sh --dry-run       show what would change, change nothing
-#   ./update.sh --no-backup     skip the VM backups (they take a few minutes per host)
+#   ./update.sh --no-backup     skip the backups (seconds on prx1's guests: they go to PBS)
 #   ./update.sh --yes           do not ask (for a non-interactive shell)
 #
-# Steps: bump the pinned tags, commit and push, back up each affected host (proxmox-lab
-# `make backup`), then on each host `git pull` and recreate only the updated apps, Caddy
-# last. Without --major or name=version it stays within each app's major version; a major
+# Steps: bump the pinned tags, commit and push, back up each affected host (to the Backup
+# Server on prx2 where its Proxmox host has one, else that host's `data`; both prune on
+# their own), then on each host `git pull`, recreate only the updated apps, Caddy last, and
+# delete the image each one replaced once it is running. Without --major or name=version it stays within each app's major version; a major
 # jump is marked MAJOR in the list (read its upgrade notes first). Rolling back is `git revert` of the update commit, then ./update.sh's
 # last step by hand (see README, "Updating an app").
 set -euo pipefail
@@ -101,14 +102,25 @@ git commit -qam "$msg" && git push -q && echo "Committed and pushed: $msg"
 for h in $(for d in $folders; do hosts_for "$d"; done | sort -u); do
   apps=$(for d in $folders; do grep -qx "$d" "hosts/$h" && echo "$d"; done | grep -vx caddy || true)
   grep -qx caddy <<<"$folders" && grep -qx caddy "hosts/$h" && apps="$apps caddy"
+  old=$(for c in "${changes[@]}"; do IFS='|' read -r f d o n <<<"$c"; { grep -qx "$d" "hosts/$h" && echo "$o"; } || true; done | sort -u | paste -sd ' ' -)
   echo; echo "== $h: $apps"
-  if $backup; then make -s -C "$LAB" backup NAME="$h" | tail -1; fi
+  if $backup; then
+    set -- $("$LAB/scripts/vm-locate.sh" "$h")
+    st=data
+    ssh -i ~/.ssh/id_ed25519_homelab -o BatchMode=yes "root@$1" pvesm status 2>/dev/null | awk '$1 == "pbs" && $3 == "active"' | grep -q . && st=pbs
+    echo "  backup of $h ($2) to $st"
+    out=$(make -s -C "$LAB" backup-vm HOST="$1" VMID="$2" STORAGE="$st" 2>&1) || true
+    grep -q 'Backup job finished successfully' <<<"$out" || { echo "$out" | tail -5; echo "Backup failed: nothing updated on $h." >&2; exit 1; }
+    grep -E 'Finished Backup' <<<"$out" | sed 's/^INFO: /  /'
+  fi
   ssh "$h" "set -e; cd /opt/docker && git pull -q --ff-only
     for a in $apps; do
       cd /opt/docker/\$a
       if [ \$a = caddy ]; then docker compose build -q --pull && docker compose up -d --quiet-pull
       else docker compose pull -q && docker compose up -d --quiet-pull; fi
       echo \"  \$a: \$(docker compose ps --format '{{.Name}} {{.Status}}' | paste -sd ',' -)\"
-    done"
+    done
+    # Every app is up on its new version: delete the images they replaced (one still in use is kept)
+    for i in $old; do docker image rm \"\$i\" >/dev/null 2>&1 && echo \"  removed old image \$i\" || true; done"
 done
 echo; echo "Done. Check the apps work; to roll back: git revert HEAD, push, and re-run the host step."
