@@ -9,6 +9,7 @@
 #   ./update.sh --dry-run       show what would change, change nothing
 #   ./update.sh --no-backup     skip the backups (seconds on prx1's guests: they go to PBS)
 #   ./update.sh --yes           do not ask (for a non-interactive shell)
+#   ./update.sh --redeploy n8n  deploy what git already says (after a failed run), no bumps
 #
 # Steps: bump the pinned tags, commit and push, back up each affected host (to the Backup
 # Server on prx2 where its Proxmox host has one, else that host's `data`; both prune on
@@ -21,14 +22,15 @@ cd "$(dirname "$0")"
 source ./check-updates.sh
 LAB=${PROXMOX_LAB:-../proxmox-lab}
 
-dry=false backup=true yes=false major=false only=() pins=()
+dry=false backup=true yes=false major=false redeploy=false only=() pins=()
 for a in "$@"; do
   case $a in
     --dry-run) dry=true ;;
     --no-backup) backup=false ;;
     --yes|-y) yes=true ;;
     --major) major=true ;;
-    -h|--help) sed -n '2,18p' "$0"; exit 0 ;;
+    --redeploy) redeploy=true ;;
+    -h|--help) sed -n '2,19p' "$0"; exit 0 ;;
     -*) echo "Unknown option $a" >&2; exit 2 ;;
     *=*) pins+=("$a"); only+=("${a%%=*}") ;;
     *) only+=("${a%/}") ;;
@@ -37,6 +39,20 @@ done
 
 [ -z "$(git status --porcelain)" ] || { echo "homelab-apps has uncommitted changes; commit or stash them first." >&2; exit 1; }
 git pull -q --ff-only
+hosts_for() { grep -lx "$1" hosts/prdsrv* 2>/dev/null | xargs -n1 basename; }
+changes=()
+
+if $redeploy; then
+  [ ${#only[@]} -gt 0 ] || { echo "--redeploy needs the apps (folders) to deploy." >&2; exit 2; }
+  for d in "${only[@]}"; do [ -d "$d" ] || { echo "No folder $d" >&2; exit 2; }; done
+  folders=$(printf '%s\n' "${only[@]}" | sort -u)
+  echo "Redeploy as git has them (no version changes): $(paste -sd ' ' - <<<"$folders")"
+  $dry && { echo "(dry run: nothing changed)"; exit 0; }
+  if ! $yes; then
+    read -r -p "Deploy now? Each app restarts for a few seconds; Caddy (every site) last. [y/N] " ok
+    [ "$ok" = y ] || [ "$ok" = Y ] || { echo "Nothing changed."; exit 0; }
+  fi
+else
 
 # 1. What can be updated: file, folder, old ref, new ref
 changes=()
@@ -77,7 +93,6 @@ done
 
 # Which hosts run each updated folder (hosts/<host> lists its folders)
 folders=$(for c in "${changes[@]}"; do cut -d'|' -f2 <<<"$c"; done | sort -u)
-hosts_for() { grep -lx "$1" hosts/prdsrv* 2>/dev/null | xargs -n1 basename; }
 echo "Hosts:"
 for h in $(for d in $folders; do hosts_for "$d"; done | sort -u); do
   echo "  $h: $(for d in $folders; do grep -qx "$d" "hosts/$h" && printf '%s ' "$d"; done)"
@@ -97,12 +112,23 @@ for c in "${changes[@]}"; do
 done
 msg="Update: $(printf '%s\n' "${summary[@]}" | sort -u | paste -sd ';' - | sed 's/;/; /g')"
 git commit -qam "$msg" && git push -q && echo "Committed and pushed: $msg"
+fi
+
+# Images an app's last commit replaced (for --redeploy), from git's record of the change
+replaced_in_git() {  # <folder>
+  local c; c=$(git log -1 --format=%H -- "$1")
+  git diff "$c~1" "$c" -U0 -- "$1" | sed -nE 's/^-[[:space:]]*(image:|FROM)[[:space:]]+"?([^" ]+).*/\2/p'
+}
 
 # 3. Each host: backup, pull, recreate the updated apps (Caddy last)
 for h in $(for d in $folders; do hosts_for "$d"; done | sort -u); do
-  apps=$(for d in $folders; do grep -qx "$d" "hosts/$h" && echo "$d"; done | grep -vx caddy || true)
-  grep -qx caddy <<<"$folders" && grep -qx caddy "hosts/$h" && apps="$apps caddy"
-  old=$(for c in "${changes[@]}"; do IFS='|' read -r f d o n <<<"$c"; { grep -qx "$d" "hosts/$h" && echo "$o"; } || true; done | sort -u | paste -sd ' ' -)
+  apps=$(for d in $folders; do { grep -qx "$d" "hosts/$h" && echo "$d"; } || true; done | grep -vx caddy | paste -sd ' ' - || true)
+  if grep -qx caddy <<<"$folders" && grep -qx caddy "hosts/$h"; then apps="${apps:+$apps }caddy"; fi
+  if $redeploy; then
+    old=$(for d in $apps; do replaced_in_git "$d"; done | sort -u | paste -sd ' ' - || true)
+  else
+    old=$(for c in ${changes[@]+"${changes[@]}"}; do IFS='|' read -r f d o n <<<"$c"; { grep -qx "$d" "hosts/$h" && echo "$o"; } || true; done | sort -u | paste -sd ' ' - || true)
+  fi
   echo; echo "== $h: $apps"
   if $backup; then
     set -- $("$LAB/scripts/vm-locate.sh" "$h")
@@ -113,14 +139,20 @@ for h in $(for d in $folders; do hosts_for "$d"; done | sort -u); do
     grep -q 'Backup job finished successfully' <<<"$out" || { echo "$out" | tail -5; echo "Backup failed: nothing updated on $h." >&2; exit 1; }
     grep -E 'Finished Backup' <<<"$out" | sed 's/^INFO: /  /'
   fi
-  ssh "$h" "set -e; cd /opt/docker && git pull -q --ff-only
-    for a in $apps; do
-      cd /opt/docker/\$a
-      if [ \$a = caddy ]; then docker compose build -q --pull && docker compose up -d --quiet-pull
-      else docker compose pull -q && docker compose up -d --quiet-pull; fi
-      echo \"  \$a: \$(docker compose ps --format '{{.Name}} {{.Status}}' | paste -sd ',' -)\"
-    done
-    # Every app is up on its new version: delete the images they replaced (one still in use is kept)
-    for i in $old; do docker image rm \"\$i\" >/dev/null 2>&1 && echo \"  removed old image \$i\" || true; done"
+  # A bash script on stdin, the app and image lists as arguments: the login shell (zsh) only
+  # starts bash, so nothing depends on how it parses.
+  ssh "$h" "bash -s -- '$apps' '$old'" <<'REMOTE'
+set -euo pipefail
+apps=$1 old=$2
+cd /opt/docker && git pull -q --ff-only
+for a in $apps; do
+  cd "/opt/docker/$a"
+  if [ "$a" = caddy ]; then docker compose build -q --pull && docker compose up -d --quiet-pull
+  else docker compose pull -q && docker compose up -d --quiet-pull; fi
+  echo "  $a: $(docker compose ps --format '{{.Name}} {{.Status}}' | paste -sd ',' -)"
+done
+# Every app is up on its new version: delete the images they replaced (one still in use is kept)
+for i in $old; do docker image rm "$i" >/dev/null 2>&1 && echo "  removed old image $i" || true; done
+REMOTE
 done
 echo; echo "Done. Check the apps work; to roll back: git revert HEAD, push, and re-run the host step."
