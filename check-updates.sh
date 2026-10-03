@@ -30,17 +30,29 @@ tags() {  # <registry> <repository>: every tag, following pagination
   done
 }
 
-check() {  # <where> <image:tag>
-  local where=$1 ref=$2 name=${2%:*} tag=${2##*:} reg repo pattern all same major
+versions() {  # <image:tag>: every tag of the same shape (v prefix, number of parts, suffix), oldest first
+  local name=${1%:*} tag=${1##*:} reg repo pattern
   case $name in
     */*.*/*|*.*/*) reg=${name%%/*}; repo=${name#*/} ;;
     */*) reg=docker.io; repo=$name ;;
     *) reg=docker.io; repo=library/$name ;;
   esac
   [ "$reg" = docker.io ] && repo=${repo#docker.io/}
-  # Compare like with like: same shape of tag (v prefix, number of parts, suffix)
   pattern="^$(sed -E 's/[0-9]+/[0-9]+/g; s/\./\\./g' <<<"$tag")\$"
-  all=$(tags "$reg" "$repo" | grep -E "$pattern" | sort -V)
+  tags "$reg" "$repo" | grep -E "$pattern" | sort -V
+}
+
+newer_same_major() {  # <image:tag>: the newest tag in the same major version, if newer; else nothing
+  local tag=${1##*:} all cur_major same
+  all=$(versions "$1") || return
+  cur_major=$(grep -oE '^[^0-9]*[0-9]+' <<<"$tag")
+  same=$(grep -E "^${cur_major}([^0-9]|$)" <<<"$all" | tail -1)
+  [ -n "$same" ] && [ "$same" != "$tag" ] && [ "$(printf '%s\n%s\n' "$tag" "$same" | sort -V | tail -1)" = "$same" ] && echo "$same"
+}
+
+check() {  # <where> <image:tag>
+  local where=$1 ref=$2 name=${2%:*} tag=${2##*:} all same major
+  all=$(versions "$ref")
   if [ -z "$all" ]; then printf '%-28s %-34s %s\n' "${name##*/}" "$tag" "(could not read tags)"; return; fi
   local cur_major; cur_major=$(grep -oE '^[^0-9]*[0-9]+' <<<"$tag")
   same=$(grep -E "^${cur_major}([^0-9]|$)" <<<"$all" | tail -1)
@@ -50,6 +62,9 @@ check() {  # <where> <image:tag>
   [ "$major" != "$same" ] && note="${note:+$note, }major: $major"
   printf '%-28s %-34s %s\n' "${name##*/}" "$tag" "${note:-up to date}"
 }
+
+# Sourced by update.sh for the functions above; run directly, it prints the table.
+[ "${BASH_SOURCE[0]}" = "$0" ] || return 0
 
 printf '%-28s %-34s %s\n' "image" "pinned" "newer"
 for f in */docker-compose.yml; do
