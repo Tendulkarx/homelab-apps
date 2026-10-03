@@ -5,7 +5,7 @@ services:
   property-search:
     image: ghcr.io/tendulkarx/property-search:2.4.0
     profiles: ["job"]
-    env_file: .env # OP_SERVICE_ACCOUNT_TOKEN only; every other secret comes from 1Password
+    env_file: .env # every setting, built from 1Password by build-env.py (see .env.example)
     environment:
       - APP_ENV=prod
       - TZ=Europe/London
