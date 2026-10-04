@@ -147,6 +147,12 @@ body {
   border-color: rgba(45, 140, 240, 0.50) !important;
   box-shadow: 0 12px 34px rgba(45, 140, 240, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.07) !important;
 }
+/* Custom widgets (Backups & jobs): Homarr wraps them in a box with `contain: paint` and the card
+   hides overflow, which cut off the bottom of each box's hover glow. The boxes always fit, so
+   the glow is let through, as it is for app tiles. */
+.customApi-wrapper.board-grid-item-content.mantine-Card-root,
+.customApi-wrapper [style*="contain:"] { overflow: visible !important; contain: layout style !important; }
+
 /* The machine's name: plain light text beside its status dot, not a grey pill */
 .beszelSystemGrid-wrapper .mantine-Card-root .mantine-Badge-root {
   background: transparent !important;
