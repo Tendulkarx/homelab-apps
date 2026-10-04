@@ -68,6 +68,10 @@ When an app moves off prdsrv1, delete its project in Arcane afterwards (Destroy,
 files" and "remove volumes" both off): Arcane keeps a record of every folder it has seen, and a
 folder that has gone shows as a stopped project.
 
+property-search is the exception: its `run.sh` fast-forwards `/opt/docker` before every
+scheduled run when the only changes waiting are property-search's (or in folders this host does
+not run), so pushing a change to its folder, or merging its release PR, is the whole deploy.
+
 Edited on the server or in Arcane instead: commit and push from `/opt/docker` (it has its own
 deploy key for this repo), then `git pull` on the Mac.
 
