@@ -3,7 +3,7 @@
 # The "job" profile keeps `docker compose up -d` from starting it.
 services:
   property-search:
-    image: ghcr.io/tendulkarx/property-search:2.4.0
+    image: ghcr.io/tendulkarx/property-search:2.6.0
     profiles: ["job"]
     env_file: .env # every setting, built from 1Password by build-env.py (see .env.example)
     environment:
