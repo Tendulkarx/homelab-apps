@@ -5,7 +5,7 @@
 # beszel_agent). About 10 MB of memory.
 services:
   beszel-agent:
-    image: henrygd/beszel-agent:0.21.0
+    image: henrygd/beszel-agent:0.21.1
     container_name: beszel-agent
     restart: unless-stopped
     # Host network: the host's own interfaces and traffic, not the container's

@@ -11,7 +11,7 @@ services:
     networks:
       - proxy
   gotenberg:
-    image: gotenberg/gotenberg:8.37.0
+    image: gotenberg/gotenberg:8.38.1
     container_name: paperless-gotenberg
     restart: unless-stopped
     command:
@@ -27,7 +27,7 @@ services:
     networks:
       - proxy
   webserver:
-    image: ghcr.io/paperless-ngx/paperless-ngx:3.3.1
+    image: ghcr.io/paperless-ngx/paperless-ngx:3.3.4
     container_name: paperless-webserver
     restart: unless-stopped
     depends_on:

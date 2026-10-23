@@ -2,7 +2,7 @@
 # allow and deny lists, groups, clients and local DNS records, every hour. Runs on prdsrv3.
 services:
   nebula-sync:
-    image: ghcr.io/lovelaze/nebula-sync:v0.11.2
+    image: ghcr.io/lovelaze/nebula-sync:v0.11.3
     container_name: nebula-sync
     restart: unless-stopped
     environment:

@@ -5,7 +5,7 @@
 # (docker-socket-proxy), never from a full Docker socket.
 services:
   homarr:
-    image: ghcr.io/homarr-labs/homarr:v2.5.2
+    image: ghcr.io/homarr-labs/homarr:v2.8.0
     container_name: homarr
     restart: unless-stopped
     env_file: .env
