@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-# The only command n8n's SSH key may run (forced command in ~turbx/.ssh/authorized_keys).
+# The only command n8n's SSH key may run (forced command in the admin user's ~/.ssh/authorized_keys).
 # By hand: ./run.sh [run|check|import-sheet|migrate] [options]; no arguments means a normal run.
 # Each run writes logs/property_search_<time>.log and keeps its container so Dozzle can show it;
 # containers go after 14 days, log files after 90. logs/ is 1777 like /tmp: the app runs as UID
-# 10001 and turbx, owning the folder, can still delete.
+# 10001 and the admin user, owning the folder, can still delete.
 #
 # Before each run it brings /opt/docker up to date when the only changes waiting on GitHub are
 # property-search's (or in folders or top-level files this host does not run), so merging the

@@ -17,7 +17,7 @@ import sys
 import tomllib
 from pathlib import Path
 
-from homarr_session import login, mutate, query
+from homarr_session import DOMAIN, login, mutate, query
 
 DRY = "--dry-run" in sys.argv
 ICON = "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/{}.svg"
@@ -99,7 +99,7 @@ SERVER_GRID = {"statusFilter": "all", "showCpu": True, "showMemory": True, "show
                "showLoadAvg": True, "showNet": True, "showTemp": False, "showBattery": False, "showServices": False,
                "showUptime": True, "showAgent": False}
 # Charts for the two physical hosts (Beszel system ids). A hub rebuilt from nothing gives every
-# machine a new id: read them from beszel.example.com (a system's page address) and update these.
+# machine a new id: read them from beszel.<DOMAIN> (a system's page address) and update these.
 HOST_HISTORY = {"prx1": "03hzcypegtkki1k", "prx2": "ovs2248dq83evvn"}
 # No sidebar (a right rail was tried on 2026-10-03 and dropped): Base is 12 columns, no rails.
 RAIL_COLUMNS = 0
@@ -116,7 +116,7 @@ def history(system_id):
 
 
 login()
-spec = tomllib.loads((Path(__file__).resolve().parent.parent / "apps.toml").read_text())
+spec = tomllib.loads((Path(__file__).resolve().parent.parent / "apps.toml").read_text().replace("{DOMAIN}", DOMAIN))
 b = query("board.getBoardByName", {"name": "Homelab"})
 COLS = 12 * SCALE + RAIL_COLUMNS
 layouts = [dict(lay) for lay in b["layouts"]]

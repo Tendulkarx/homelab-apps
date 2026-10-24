@@ -1,7 +1,7 @@
 # Beszel hub: CPU, memory, disk, network and container history for every host, with alerts.
 # Runs on prdsrv3, which is on prx2, so it keeps recording when prx1 is down. Agents (beszel-agent/
 # on the VMs, proxmox-lab role beszel_agent on the Proxmox hosts) connect to it over WebSocket
-# through Caddy: beszel.example.com. The page is published on HUB_BIND:8090 for Caddy on prdsrv1
+# through Caddy: beszel.<DOMAIN>. The page is published on HUB_BIND:8090 for Caddy on prdsrv1
 # only (proxmox-lab docker_firewall). About 30 MB of memory; the database thins old data itself.
 services:
   beszel:
@@ -10,8 +10,8 @@ services:
     restart: unless-stopped
     mem_limit: 256m
     environment:
-      - APP_URL=https://beszel.example.com
-      # First start only: creates this admin (1Password "Homelab - Beszel")
+      - APP_URL=https://beszel.${DOMAIN:?set DOMAIN in .env}
+      # First start only: creates this admin (the Beszel login item in 1Password, referenced in .env.example)
       - USER_EMAIL=${BESZEL_USER_EMAIL}
       - USER_PASSWORD=${BESZEL_USER_PASSWORD}
       # Every user sees every system (the read-only homarr user included)

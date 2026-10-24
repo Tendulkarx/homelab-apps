@@ -17,7 +17,8 @@ set -euo pipefail
 VAULT=Development
 ITEM=homelab-rclone-offsite
 # Every host with db_backups (proxmox-lab inventory): prdsrv2 (databases), prdsrv1 (n8n, Paperless)
-HOSTS=(turbx@10.69.20.114 turbx@10.69.20.113)
+ADMIN_USER=${ADMIN_USER:-$(op read op://Development/homelab-shared/env/ADMIN_USER)}
+HOSTS=("$ADMIN_USER@10.69.20.114" "$ADMIN_USER@10.69.20.113")
 ssh_to() { ssh -i "$HOME/.ssh/id_ed25519_homelab" -o BatchMode=yes "$@"; }
 
 command -v rclone >/dev/null || brew install rclone

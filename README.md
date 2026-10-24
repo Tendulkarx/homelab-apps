@@ -17,7 +17,7 @@ Each host checks out only its own folders (listed in `hosts/<host>`, see `hosts/
 | `paperless` | prdsrv1 | Paperless-ngx with Redis, Tika and Gotenberg | `paperless.` |
 | `n8n` | prdsrv1 | Automation; starts property-search on prdsrv2 over SSH | `n8n.` |
 | `metabase` | prdsrv1 | Reporting | `metabase.` |
-| `dozzle` | prdsrv1 | Live logs of every container on all three hosts (login `turbx`) | `logs.` |
+| `dozzle` | prdsrv1 | Live logs of every container on all three hosts (login in 1Password `homelab-dozzle`) | `logs.` |
 | `homarr` | prdsrv1 | Dashboard: every app, host, VM, container, DNS and monitor on one page (replaced Homepage 2026-09-30) | `home.`, `dash.` |
 | `docker-socket-proxy` | all three | Read-only Docker API for Homarr and the Beszel agents (lists containers, refuses everything else) | port 2375, prdsrv1 only |
 | `beszel-agent` | all three | Sends the host's CPU, memory, disk, network and container stats to the Beszel hub; connects out, listens on no port | none |
@@ -59,7 +59,7 @@ git pull
 git commit -am "paperless: what changed and why" && git push
 
 # Server
-ssh turbx@10.69.20.114
+ssh prdsrv2
 cd /opt/docker && git pull
 cd paperless && docker compose up -d        # recreates only what changed
 ```
@@ -129,12 +129,13 @@ every setting with its 1Password reference, so a lost `.env` is rebuilt with:
 op inject -i .env.example -o .env
 ```
 
-Dozzle's login (user `turbx`) is the 1Password item `homelab-dozzle`. The server only holds a
+Dozzle's login is the 1Password item `homelab-dozzle`. The server only holds a
 hash of it in `dozzle/data/users.yml`, which is not committed; to rebuild that file, from the Mac:
 
 ```bash
-op read op://Development/homelab-dozzle/password | ssh prdsrv1 'cd /opt/docker/dozzle && mkdir -p data &&
-  docker run --rm amir20/dozzle:v11.1.2 generate turbx --password "$(cat)" > data/users.yml'
+u=$(op read op://Development/homelab-dozzle/username)
+op read op://Development/homelab-dozzle/password | ssh prdsrv1 "cd /opt/docker/dozzle && mkdir -p data &&
+  docker run --rm amir20/dozzle:v11.1.2 generate $u --password \"\$(cat)\" > data/users.yml"
 ```
 
 Beszel agents register once, then the hub knows each by the fingerprint in its `data/`
@@ -142,7 +143,7 @@ folder (the Proxmox hosts: `/var/lib/beszel-agent`). The hub's universal token i
 a rebuilt machine, or a new one, is refused until it registers again: in the hub, Settings >
 Tokens & Fingerprints, switch the universal token on for an hour, start the agent, switch it
 off. A hub rebuilt from nothing (no `beszel/data`) also has a new key: copy its public key and
-token into `Homelab - Beszel` (section `agents`), rebuild each agent's `.env`, run `make hosts
+token into the Beszel login item in 1Password (section `agents`, id in `beszel-agent/.env.example`), rebuild each agent's `.env`, run `make hosts
 ARGS="--tags beszel"` in proxmox-lab for prx1 and prx2, and update the system ids in
 `homarr/theme/layout.py`.
 

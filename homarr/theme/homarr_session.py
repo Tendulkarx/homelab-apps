@@ -6,23 +6,33 @@ key, so it is shown once: to replace it, create one under Management > Tools > A
 into that item, and delete the old key in Homarr.
 """
 import json
+import os
 import ssl
 import subprocess
 import urllib.error
 import urllib.parse
 import urllib.request
 
-BASE = "https://dash.example.com"
 KEY_REF = "op://Development/homelab-homarr-api/credential"
+DOMAIN_REF = "op://Development/homelab-shared/env/DOMAIN"
 _headers = {}
 opener = urllib.request.build_opener(urllib.request.HTTPSHandler(context=ssl.create_default_context()))
 
 
-def api_key():
-    read = subprocess.run(["op", "read", KEY_REF], capture_output=True, text=True)
+def op_read(ref, what):
+    read = subprocess.run(["op", "read", ref], capture_output=True, text=True)
     if read.returncode or not read.stdout.strip():
-        raise SystemExit(f"Homarr API key not readable from 1Password ({KEY_REF}): {read.stderr.strip()}")
+        raise SystemExit(f"{what} not readable from 1Password ({ref}): {read.stderr.strip()}")
     return read.stdout.strip()
+
+
+def api_key():
+    return op_read(KEY_REF, "Homarr API key")
+
+
+# The base domain of every app address; $DOMAIN wins, so a host without `op` can set it.
+DOMAIN = os.environ.get("DOMAIN") or op_read(DOMAIN_REF, "Base domain")
+BASE = f"https://dash.{DOMAIN}"
 
 
 def login():
