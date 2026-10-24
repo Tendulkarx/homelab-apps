@@ -129,6 +129,17 @@ every setting with its 1Password reference, so a lost `.env` is rebuilt with:
 op inject -i .env.example -o .env
 ```
 
+This repo is public, so the base domain is not written in any file. Compose files use
+`${DOMAIN}` and each app that needs it has `DOMAIN` in its `.env`, filled from the shared item
+`homelab-shared` (`op://Development/homelab-shared/env/DOMAIN`). A missing `DOMAIN` stops
+`docker compose` with "required variable DOMAIN is missing a value" rather than starting the app with
+a blank address. Pi-hole's `PIHOLE_WEB_DOMAIN` and nebula-sync's `PRIMARY` are built from the same
+field. The Homarr scripts on the Mac read it through `op`, or from `$DOMAIN` when set.
+
+Each server pulls this repo with its own deploy key (`~/.ssh/id_ed25519_homelab_apps`, read-only
+except prdsrv2's). A new server needs a new key added under the repo's Settings › Deploy keys: GitHub
+refuses a key that any other repo, even a deleted one, still holds.
+
 Dozzle's login is the 1Password item `homelab-dozzle`. The server only holds a
 hash of it in `dozzle/data/users.yml`, which is not committed; to rebuild that file, from the Mac:
 
