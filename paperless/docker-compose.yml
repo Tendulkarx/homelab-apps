@@ -1,6 +1,6 @@
 services:
   broker:
-    image: redis:8.10.2
+    image: redis:8.10.3
     container_name: paperless-broker
     # Paperless gives ./data (which holds ./data/redis) to UID 1000 at every start
     user: "1000:1000"
@@ -11,7 +11,7 @@ services:
     networks:
       - proxy
   gotenberg:
-    image: gotenberg/gotenberg:8.38.1
+    image: gotenberg/gotenberg:8.39.0
     container_name: paperless-gotenberg
     restart: unless-stopped
     command:
@@ -21,7 +21,7 @@ services:
     networks:
       - proxy
   tika:
-    image: apache/tika:4.1.0
+    image: apache/tika:4.2.0
     container_name: paperless-tika
     restart: unless-stopped
     networks:
