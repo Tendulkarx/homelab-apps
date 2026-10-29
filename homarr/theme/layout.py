@@ -75,10 +75,12 @@ def repo(name, provider, identifier, icon, prefix="", precision=3):
 
 # Latest release of everything homelab-apps pins, to compare with the compose files. Docker Hub
 # wherever the project publishes there; GitHub only for Homarr and Arcane, as anonymous GitHub
-# allows 60 requests an hour.
+# allows 60 requests an hour. LinuxServer tags (3.4.7-r0-ls104) fit no version filter, so the socket
+# proxy has none. Not listable here: SQL Server and Oracle (registries Homarr cannot read) and
+# property-search (a private repository).
 RELEASES = {
-    "newReleaseWithin": "1w", "staleReleaseWithin": "6M", "showOnlyHighlighted": False, "showDetails": True,
-    "showOnlyIcon": False, "topReleases": 0,
+    "layout": "compact", "summary": "count", "newReleaseWithin": "1w", "staleReleaseWithin": "6M",
+    "showChangelogPreview": True,
     "repositories": [
         repo("Homarr", "github", "homarr-labs/homarr", "homarr", "v"),
         repo("Arcane", "github", "getarcaneapp/arcane", "arcane", "v"),
@@ -86,13 +88,16 @@ RELEASES = {
         repo("nebula-sync", "dockerHub", "lovelaze/nebula-sync", "pi-hole", "v"),
         repo("Pi-hole", "dockerHub", "pihole/pihole", "pi-hole"),
         repo("Uptime Kuma", "dockerHub", "louislam/uptime-kuma", "uptime-kuma"),
-        repo("n8n 2", "dockerHub", "n8nio/n8n", "n8n", "2.", 2),
+        repo("n8n 3", "dockerHub", "n8nio/n8n", "n8n", "3.", 2),
         repo("Metabase", "dockerHub", "metabase/metabase", "metabase", "v0."),
         repo("Dozzle", "dockerHub", "amir20/dozzle", "dozzle", "v"),
         repo("Caddy", "dockerHub", "caddy", "caddy"),
         repo("Gotenberg", "dockerHub", "gotenberg/gotenberg", "gotenberg"),
         repo("Postgres 18", "dockerHub", "postgres", "postgres", "18.", 1),
         repo("Redis 8", "dockerHub", "redis", "redis", "8.", 2),
+        repo("Beszel", "dockerHub", "henrygd/beszel", "beszel"),
+        repo("Tika", "dockerHub", "apache/tika", "apache"),
+        {k: v for k, v in repo("Socket proxy", "linuxServerIO", "linuxserver/socket-proxy", "docker").items() if k != "versionFilter"},
     ],
 }
 # One card per machine from Beszel (hub on prdsrv3); glazzed.css makes each machine its own card.
@@ -319,7 +324,7 @@ for it in items:
         place(it, cid["Containers & updates"], 0, 0, 8, 6)
     elif k == "releases":
         it["options"]["repositories"] = RELEASES["repositories"]  # the list follows homelab-apps; other settings stay
-        it["options"] = {**RELEASES, **it["options"]}
+        it["options"] = {**RELEASES, **{k: v for k, v in it["options"].items() if v is not None}}
         place(it, cid["Containers & updates"], 8, 0, 4, 6)
     elif k == "customApi":
         name = next((n for n, w in custom.items() if w["id"] == it["options"].get("definitionId")), None)

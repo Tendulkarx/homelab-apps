@@ -53,7 +53,9 @@ CSS of its own, so the theme lives in one place. Run it on the Mac (Touch ID onc
   groups that never collapse (Homarr "dynamic" sections). First every link, one balanced row
   per group: Apps, Monitoring & network, Infrastructure. Then the live panels: Servers (Beszel,
   one card per machine), Host history (Beszel charts for prx1 and prx2, 24 hours), Containers &
-  updates (containers on all three hosts and a Releases list of everything homelab-apps pins),
+  updates (containers on all three hosts and a Releases list of what homelab-apps pins: upstream's
+  latest release only, checked every 6 hours, never the running version; `../../check-updates.sh`
+  compares; SQL Server, Oracle and property-search are not listable),
   Notes (the notebook, full width; its text is `../widgets/notes.html`, set by `layout.py --notes`;
   the Paperless widget was dropped on 2026-10-29: Paperless holds no documents, so it only showed
   zeros). Releases uses Docker Hub where a project publishes there; only Homarr and
