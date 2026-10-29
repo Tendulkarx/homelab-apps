@@ -112,7 +112,7 @@ RAIL_COLUMNS = 0
 NO_TITLE = {"title": None, "customCssClasses": [], "borderColor": ""}
 # Custom widgets (../widgets/*.json, deployed by widgets.py):
 #   name: (group, x, y, width, height or {layout: height}, height on Mobile)
-WIDGETS = {"Backups": ("Backups & jobs", 0, 0, 12, 2, 6)}
+WIDGETS = {"Backups": ("Backups & jobs", 0, 0, 12, 2, 6), "Updates": ("Containers & updates", 8, 0, 4, 1, 2)}
 # The notebook's text. Edits made in Homarr stay; --notes replaces them with this file.
 NOTES = Path(__file__).resolve().parent.parent / "widgets/notes.html"
 # Widgets no longer on the board: Paperless (dropped 2026-10-29: it holds no documents, so all zeros)
@@ -325,7 +325,7 @@ for it in items:
     elif k == "releases":
         it["options"]["repositories"] = RELEASES["repositories"]  # the list follows homelab-apps; other settings stay
         it["options"] = {**RELEASES, **{k: v for k, v in it["options"].items() if v is not None}}
-        place(it, cid["Containers & updates"], 8, 0, 4, 6)
+        place(it, cid["Containers & updates"], 8, 1, 4, 5)  # under the Updates card
     elif k == "customApi":
         name = next((n for n, w in custom.items() if w["id"] == it["options"].get("definitionId")), None)
         if name:

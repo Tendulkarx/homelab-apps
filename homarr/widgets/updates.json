@@ -1,0 +1,38 @@
+{
+  "$schema": "homarr-custom-widget-v2",
+  "$comment": "Which apps run an older version than their newest release: updates.json from update-status.sh (prdsrv1, every six hours), served by Caddy on the proxy network only.",
+  "name": "Updates",
+  "description": "Apps behind their newest release (same major, from ./update.sh) and new major versions, from check-updates.sh every six hours.",
+  "sources": {
+    "default": {
+      "name": "Update status",
+      "baseUrl": "http://caddy:8099",
+      "auth": "none"
+    }
+  },
+  "requests": {
+    "updates": {
+      "path": "/updates.json"
+    }
+  },
+  "templateLines": [
+    "<Paper px=\"sm\" py=\"xs\" radius=\"md\" h=\"100%\" style={{ minWidth: 0, display: \"flex\", flexDirection: \"column\", justifyContent: \"center\", gap: 6, overflow: \"hidden\" }}>",
+    "  <Group gap=\"sm\" wrap=\"nowrap\">",
+    "    <ThemeIcon variant=\"light\" radius=\"md\" size=\"lg\" color={status.updates?.ok === false || !data.updates?.checked ? \"gray\" : data.updates.behind > 0 ? \"orange\" : data.updates.majors > 0 ? \"yellow\" : \"green\"}><TablerIcon name={status.updates?.ok === false || !data.updates?.checked ? \"alert-triangle\" : data.updates.behind > 0 ? \"circle-arrow-up\" : \"circle-check\"} size={20} /></ThemeIcon>",
+    "    <Stack gap={0} style={{ minWidth: 0 }}>",
+    "      <Text size=\"sm\" fw={600} truncate>{status.updates?.ok === false || !data.updates?.checked ? \"Update check not readable\" : data.updates.behind > 0 ? `${data.updates.behind} ${data.updates.behind === 1 ? \"app\" : \"apps\"} behind` : \"Everything up to date\"}</Text>",
+    "      <Text size=\"xs\" c=\"dimmed\" truncate>{data.updates?.checked ? `Checked ${Date.toLocaleString(data.updates.checked, \"en-GB\", \"Europe/London\")}` : \"Waiting for update-status.sh\"}</Text>",
+    "    </Stack>",
+    "  </Group>",
+    "  <Stack gap={4} style={{ overflowY: \"auto\", minHeight: 0 }}>",
+    "    {(data.updates?.images ?? []).filter((i, n, all) => (i.update || i.major) && all.findIndex((j) => j.app === i.app && j.update === i.update && j.major === i.major) === n).map((i) => (",
+    "      <Group key={`${i.app}-${i.image}`} justify=\"space-between\" wrap=\"nowrap\" gap=\"xs\">",
+    "        <Text size=\"xs\" truncate>{i.app}</Text>",
+    "        <Badge size=\"sm\" variant=\"light\" tt=\"none\" color={i.update ? \"orange\" : \"yellow\"} style={{ flexShrink: 0 }}>{i.update ? `${i.pinned} → ${i.update}` : `major ${i.major}`}</Badge>",
+    "      </Group>",
+    "    ))}",
+    "  </Stack>",
+    "  {data.updates?.behind > 0 ? <Text size=\"xs\" c=\"dimmed\">On the Mac: homelab-apps ./update.sh</Text> : data.updates?.majors > 0 ? <Text size=\"xs\" c=\"dimmed\">New major: read its notes, then ./update.sh app=version</Text> : null}",
+    "</Paper>"
+  ]
+}

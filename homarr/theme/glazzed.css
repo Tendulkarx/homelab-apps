@@ -276,6 +276,12 @@ h1, h2, h3, h4, .mantine-Title-root {
 .customApi-wrapper .mantine-Badge-label { font-size: calc(11px * var(--mantine-scale, 1)) !important; }
 .app-wrapper:hover .app-title { color: var(--gz-blue) !important; }
 
+/* ---- Releases --------------------------------------------------------------------------------- */
+/* Homarr 2.9 centres the list in its card, leaving equal gaps above and below a short list: start at
+   the top and let the list take the rest of the card (it scrolls when longer). */
+.releases-wrapper .releases { justify-content: flex-start !important; }
+.releases-wrapper .releases > [class*="_body"] { flex: 1 1 auto !important; min-height: 0; }
+
 /* ---- Notebook -------------------------------------------------------------------------------- */
 .mantine-RichTextEditor-root, .mantine-RichTextEditor-content, .ProseMirror,
 .mantine-RichTextEditor-toolbar, .mantine-RichTextEditor-controlsGroup, .mantine-RichTextEditor-control {

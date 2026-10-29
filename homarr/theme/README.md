@@ -34,6 +34,12 @@ CSS of its own, so the theme lives in one place. Run it on the Mac (Touch ID onc
   files, but can read tasks), and the last heartbeat of the dump, off-site and property-search
   push monitors from Uptime Kuma's homelab status page. It shows times and OK/Failed; Homarr gives
   templates no clock, so it cannot flag a backup as overdue by itself.
+  **Updates** (Containers & updates, above Releases, one row): how many apps run an older version
+  than their newest release (same major; new majors in yellow), each as pinned -> newer, and when
+  it was checked. Its data is `/opt/status/updates.json` on prdsrv1, written every six hours by
+  `../../update-status.sh` (`check-updates.sh --json`; timer from proxmox-lab role update_status)
+  and served by Caddy to Homarr only (`http://caddy:8099`, not published). Act on it with
+  `./update.sh` on the Mac; after updating, `ssh prdsrv1 /opt/docker/update-status.sh` refreshes it.
 - No sidebar: a right "rail" (Homarr 2) with a server table was tried on 2026-10-03 and dropped;
   Base is 12 columns. The owner's header adds a Docker button (apply_theme.py). The Statistics
   widget is not used: it shows hand-refreshed snapshots, and the live widgets do better.
