@@ -155,4 +155,6 @@ done
 for i in $old; do docker image rm "$i" >/dev/null 2>&1 && echo "  removed old image $i" || true; done
 REMOTE
 done
+# The Homarr Updates card reads what prdsrv1 last checked: check again now, not in up to six hours
+ssh prdsrv1 'cd /opt/docker && git pull -q --ff-only && ./update-status.sh' 2>/dev/null | sed 's/^/Updates card: /' || true
 echo; echo "Done. Check the apps work; to roll back: git revert HEAD, push, and re-run the host step."
