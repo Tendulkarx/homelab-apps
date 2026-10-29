@@ -3,6 +3,7 @@
 
   python3 layout.py            save the layout
   python3 layout.py --dry-run  show what would change, save nothing
+  python3 layout.py --notes    also set the notebook's text from ../widgets/notes.html
 
 Widget settings are defaults for new widgets only: what you change in Homarr itself (a chart's
 period, which figures a card shows) stays. One plain section holds everything; headed groups are Homarr containers that never collapse.
@@ -45,7 +46,7 @@ UNLABELLED = {"Overview"}
 # Anything below a container that grows moves down by the same amount.
 MOBILE_MIN = {"Servers": 4}
 GROUPS = [("Overview", 2), ("Apps", 1), ("Monitoring & network", 1), ("Infrastructure", 1), ("Servers", 3), ("Backups & jobs", 2),
-          ("Host history", 4), ("Containers & updates", 6), ("Documents & notes", 3)]
+          ("Host history", 4), ("Containers & updates", 6), ("Notes", 4)]
 TOP_ROW = 0
 # Extra desktop layouts (Homarr 2 breakpoints) and the heights where they differ from Base. None:
 # a "Wide" layout with a half-height Backups & jobs row needed the 24-column grid (see SCALE).
@@ -107,6 +108,10 @@ NO_TITLE = {"title": None, "customCssClasses": [], "borderColor": ""}
 # Custom widgets (../widgets/*.json, deployed by widgets.py):
 #   name: (group, x, y, width, height or {layout: height}, height on Mobile)
 WIDGETS = {"Backups": ("Backups & jobs", 0, 0, 12, 2, 6)}
+# The notebook's text. Edits made in Homarr stay; --notes replaces them with this file.
+NOTES = Path(__file__).resolve().parent.parent / "widgets/notes.html"
+# Widgets no longer on the board: Paperless (dropped 2026-10-29: it holds no documents, so all zeros)
+DROPPED = {"beszelSystemTable": "the sidebar server table", "paperlessNgx": "the Paperless widget"}
 
 
 def history(system_id):
@@ -235,8 +240,8 @@ for title, rows in MOBILE_MIN.items():
 items = []
 on_board = {n for names in tiles.values() for n in names}
 for it in b["items"]:
-    if it["kind"] == "beszelSystemTable":  # the sidebar's server table, now gone
-        changes.append("remove the sidebar server table")
+    if it["kind"] in DROPPED:
+        changes.append(f"remove {DROPPED[it['kind']]}")
         continue
     if it["kind"] == "app" and app_name.get(it["options"].get("appId")) not in on_board:
         changes.append(f"remove tile {app_name.get(it['options'].get('appId'), '?')}")
@@ -324,10 +329,13 @@ for it in items:
             for lay in it["layouts"]:
                 if lay["layoutId"] == MOBILE:
                     lay["height"] = mobile_h
-    elif k == "paperlessNgx":
-        place(it, cid["Documents & notes"], 0, 0, 6, 3)
     elif k == "notebook":
-        place(it, cid["Documents & notes"], 6, 0, 6, 3)
+        if "--notes" in sys.argv:
+            notes = NOTES.read_text().replace("{domain}", DOMAIN)
+            if it["options"].get("content") != notes:
+                changes.append("notebook text from widgets/notes.html")
+                it["options"]["content"] = notes
+        place(it, cid["Notes"], 0, 0, 12, 4)
     # any other item (added by hand in Homarr) keeps its layouts as they are
 
 # Mobile: each container exactly as tall as what it holds, stacked in the desktop order

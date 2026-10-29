@@ -1,0 +1,24 @@
+<h3>Homelab at a glance</h3>
+<table>
+<tr><th>Machine</th><th>Address</th><th>What runs there</th></tr>
+<tr><td><b>prx1</b></td><td>10.69.20.130</td><td>Proxmox (main host): prdsrv1, prdsrv2, lab VMs</td></tr>
+<tr><td><b>prx2</b></td><td>10.69.20.131</td><td>Proxmox: Backup Server, prdsrv3</td></tr>
+<tr><td><b>prdsrv1</b></td><td>10.69.20.113</td><td>Apps and Caddy: Homarr, n8n, Paperless, Metabase, Dozzle, Arcane</td></tr>
+<tr><td><b>prdsrv2</b></td><td>10.69.20.114</td><td>Databases (Postgres, SQL Server, Oracle), Pi-hole, property-search</td></tr>
+<tr><td><b>prdsrv3</b></td><td>10.69.20.115</td><td>Uptime Kuma, Beszel hub, Pi-hole 2</td></tr>
+<tr><td><b>tstsrv&lt;N&gt;</b></td><td>10.69.20.199+N</td><td>Lab VMs</td></tr>
+</table>
+<table>
+<tr><th>Every night</th><th>Where to look</th></tr>
+<tr><td><ul>
+<li><p><b>01:30</b> database and app dumps</p></li>
+<li><p><b>02:30</b> prdsrv3 to prx2</p></li>
+<li><p><b>03:00</b> off-site copy to Google Drive</p></li>
+<li><p><b>03:30</b> prx1 VMs to the Backup Server</p></li>
+</ul></td><td><ul>
+<li><p><b>Alerts</b> Gmail label Homelab</p></li>
+<li><p><b>Status</b> <a href="https://uptime.{domain}/status/homelab">uptime.{domain}/status/homelab</a></p></li>
+<li><p><b>proxmox-lab</b> hosts and VMs</p></li>
+<li><p><b>homelab-apps</b> the apps, /opt/docker</p></li>
+</ul></td></tr>
+</table>

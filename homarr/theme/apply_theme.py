@@ -8,6 +8,7 @@ the corner style and the theme as global CSS. The Homelab board keeps only its o
 owner's header gets a Docker button (Homarr's default header otherwise).
 """
 import json
+import re
 import sys
 
 from homarr_session import login, mutate, query, upload
@@ -17,6 +18,13 @@ THEMES = {
     "bluematrix": {"css": "bluematrix.css", "primaryColor": "#00b0ff", "secondaryColor": "#00ff9c", "opacity": 55, "itemRadius": "lg"},
 }
 LOGO = "homelab-logo.svg"
+
+
+def compact(css):
+    """The CSS without comments and spare whitespace: Homarr keeps at most 16384 characters."""
+    css = re.sub(r"/\*.*?\*/", "", css, flags=re.S)
+    return re.sub(r"\s*([{};])\s*", r"\1", re.sub(r"\s+", " ", css)).strip()
+
 
 name = sys.argv[1] if len(sys.argv) > 1 else "glazzed"
 t = THEMES[name]
@@ -33,7 +41,7 @@ logo = f"/api/user-medias/{media}"
 mutate("serverSettings.saveSettings", {"settingsKey": "branding", "value": {
     "appName": "Homelab", "greeting": "", "logoImageUrl": logo, "faviconImageUrl": logo,
     "primaryColor": t["primaryColor"], "secondaryColor": t["secondaryColor"], "lockPrimaryColor": False,
-    "defaultRadius": t["itemRadius"], "customCss": open(t["css"]).read(),
+    "defaultRadius": t["itemRadius"], "customCss": compact(open(t["css"]).read()),
     "authBranding": {"showAppName": True, "showLogo": True, "showGreeting": False},
 }})
 b = query("board.getBoardByName", {"name": "Homelab"})

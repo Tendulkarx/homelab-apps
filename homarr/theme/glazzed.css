@@ -266,11 +266,9 @@ h1, h2, h3, h4, .mantine-Title-root {
    Homarr 2 scale their text back up, these do not, so their text came out 4-9px. Multiplying by
    the canvas's inverse zoom gives these sizes on screen at every width. */
 .app-title { font-size: calc(13px * var(--board-canvas-inverse-scale, 1)) !important; font-weight: 400 !important; color: var(--gz-text) !important; }
-.uptimeKuma-wrapper [class*="__heroLabel"], .paperlessNgx-wrapper [class*="__heroLabel"],
-.paperlessNgx-wrapper [class*="__heroTotal"] { font-size: calc(12px * var(--board-canvas-inverse-scale, 1)) !important; }
+.uptimeKuma-wrapper [class*="__heroLabel"] { font-size: calc(12px * var(--board-canvas-inverse-scale, 1)) !important; }
 .uptimeKuma-wrapper [class*="__statLabel"] { font-size: calc(11px * var(--board-canvas-inverse-scale, 1)) !important; }
 .uptimeKuma-wrapper [class*="__statValue"] { font-size: calc(15px * var(--board-canvas-inverse-scale, 1)) !important; }
-.paperlessNgx-wrapper [class*="__heroInbox"] { font-size: calc(16px * var(--board-canvas-inverse-scale, 1)) !important; }
 /* Small badges (machine names, container states, job results): 11px on screen. Inside a card,
    Mantine multiplies its sizes by --mantine-scale to undo the canvas zoom; so does this. */
 .beszelSystemGrid-wrapper .mantine-Card-root .mantine-Badge-label,
@@ -289,6 +287,20 @@ h1, h2, h3, h4, .mantine-Title-root {
 .mantine-RichTextEditor-control { border-radius: var(--gz-r-sm) !important; }
 .ProseMirror h1, .ProseMirror h2, .ProseMirror h3 { font-weight: 300 !important; color: #fff !important; }
 .ProseMirror b, .ProseMirror strong { color: var(--gz-blue) !important; font-weight: 600; }
+/* Tables (widgets/notes.html): hairline rows, no cell boxes; side by side tables sit in one row */
+.ProseMirror .tableWrapper { margin: 0 0 12px !important; }
+.ProseMirror table { width: 100% !important; border-collapse: collapse !important; table-layout: auto !important; }
+.ProseMirror th, .ProseMirror td {
+  border: none !important; border-bottom: 1px solid var(--gz-line) !important;
+  background: transparent !important; padding: 4px 10px 4px 0 !important; vertical-align: top; text-align: left;
+}
+.ProseMirror th { color: var(--gz-muted) !important; font-weight: 400 !important;
+  text-transform: uppercase; letter-spacing: 0.06em; font-size: 0.8em; }
+.ProseMirror tr:last-child td { border-bottom: none !important; }
+.ProseMirror td ul { margin: 0 !important; padding-left: 0 !important; list-style: none; }
+.ProseMirror td li p { margin: 2px 0 !important; }
+.ProseMirror td li b { display: inline-block; min-width: 7.5em; }
+.ProseMirror .column-resize-handle, .ProseMirror .selectedCell::after { display: none !important; }
 
 /* ---- Links, focus, scrollbars ------------------------------------------------------------------ */
 a:hover { color: var(--gz-blue) !important; }

@@ -18,6 +18,7 @@ import ssl
 import sys
 import urllib.error
 import urllib.request
+from pathlib import Path
 
 SETUP = os.path.expanduser("~/.homarr-setup")
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "theme"))
@@ -138,14 +139,7 @@ for name, *_ in APPS:
     item("app", {"appId": apps[name], "openInNewTab": True, "showTitle": True, "pingEnabled": True,
                  "descriptionDisplayMode": "tooltip", "layout": "column", "_label": name})
 item("dockerContainers", {"enableRowSorting": True})
-item("paperlessNgx", {"showDocumentsTotal": True, "showDocumentsInbox": True, "showInboxRing": True,
-                      "showCorrespondents": True, "showTags": True}, ["Paperless"])
-item("notebook", {"showToolbar": True, "allowReadOnlyCheck": True, "content": (
-    "<h3>Homelab</h3>"
-    "<p><b>prdsrv1</b> .113 apps and Caddy · <b>prdsrv2</b> .114 databases, Pi-hole · "
-    "<b>prdsrv3</b> .115 Uptime Kuma, Pi-hole 2 · <b>tstsrv1</b> .200 lab</p>"
-    "<p>Backups: dumps 01:30, off-site 03:00, Backup Server 03:30. Alerts: Gmail label Homelab.</p>"
-    "<p>Repos: proxmox-lab (hosts, VMs), homelab-apps (/opt/docker). "
-    f"Status page: uptime.{DOMAIN}/status/homelab</p>")})
+item("notebook", {"showToolbar": True, "allowReadOnlyCheck": True,
+                  "content": (Path(__file__).parent / "widgets/notes.html").read_text().replace("{domain}", DOMAIN)})
 call("PATCH", f"/api/boards/{bid}/home")
 print("board Homelab: widgets added, set as home board")

@@ -10,7 +10,7 @@ CSS of its own, so the theme lives in one place. Run it on the Mac (Touch ID onc
   corners (panels 8 px, section frames 10 px, inner boxes 6 px, buttons and badges 4-5 px).
   A blurred mesh of slate blue, violet, crimson and teal; translucent glass with hairline
   borders; three glass levels (panel, inset, group) so no widget keeps its own grey (Uptime
-  Kuma's and Paperless's stat tiles, Pi-hole's cards, node lists, table header, buttons).
+  Kuma's stat tiles, Pi-hole's cards, node lists, table header, buttons).
   Sections draw no frame: every item stands on its own like the top row, under a plain light
   header in the gap above (never overlapping); per-widget title badges are hidden. Section
   cards line up with the top row's columns (the section's inner grid is pulled out by one
@@ -43,8 +43,10 @@ CSS of its own, so the theme lives in one place. Run it on the Mac (Touch ID onc
   jobs is a tile row: six boxes on the tiles' columns. On Mobile containers are as tall as their
   contents (MOBILE_MIN for Servers) and in the desktop order.
 - Text: the board is drawn zoomed out (about two-thirds); widgets that do not scale their text back
-  (app names, Uptime Kuma, Paperless) and section headings get sizes multiplied by
+  (app names, Uptime Kuma) and section headings get sizes multiplied by
   `--board-canvas-inverse-scale` in glazzed.css; badges use Mantine's `--mantine-scale`.
+- Homarr keeps at most 16384 characters of custom CSS; `apply_theme.py` uploads the theme without
+  comments and spare whitespace (glazzed.css: about 11,000), so the comments stay in the files.
 - `deploy.py` runs apply_theme.py, widgets.py and layout.py in one process: one Touch ID prompt.
 - `layout.py`: the whole layout (Homarr 2: containers, Base and Mobile layouts; it sets Base and
   keeps Mobile's own positions; widget settings are defaults for new widgets only). A top row (clock, weather, Uptime Kuma, Pi-hole), then headed
@@ -52,7 +54,9 @@ CSS of its own, so the theme lives in one place. Run it on the Mac (Touch ID onc
   per group: Apps, Monitoring & network, Infrastructure. Then the live panels: Servers (Beszel,
   one card per machine), Host history (Beszel charts for prx1 and prx2, 24 hours), Containers &
   updates (containers on all three hosts and a Releases list of everything homelab-apps pins),
-  Documents & notes. Releases uses Docker Hub where a project publishes there; only Homarr and
+  Notes (the notebook, full width; its text is `../widgets/notes.html`, set by `layout.py --notes`;
+  the Paperless widget was dropped on 2026-10-29: Paperless holds no documents, so it only showed
+  zeros). Releases uses Docker Hub where a project publishes there; only Homarr and
   Arcane come from GitHub, as anonymous GitHub allows 60 requests an hour. It imports `homarr_session.py`, which reads the Homarr API key from
   1Password (`homelab-homarr-api`, vault **Development**; Touch ID once) and sends it as the `ApiKey`
   header, so no password or key file is needed. Run the scripts on the Mac from this folder. The host history charts name their machines by Beszel system
