@@ -38,6 +38,7 @@ versions() {  # <image:tag>: every tag of the same shape (v prefix, number of pa
     *) reg=docker.io; repo=library/$name ;;
   esac
   [ "$reg" = docker.io ] && repo=${repo#docker.io/}
+  [ "$reg" = lscr.io ] && reg=ghcr.io  # LinuxServer's registry name serves the images on GHCR
   pattern="^$(sed -E 's/[0-9]+/[0-9]+/g; s/\./\\./g' <<<"$tag")\$"
   tags "$reg" "$repo" | grep -E "$pattern" | sort -V
 }
