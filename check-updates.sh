@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # List newer releases of every pinned image (read-only: only asks the registries for tag lists).
-#   ./check-updates.sh
+#   ./check-updates.sh          a table
+#   ./check-updates.sh --json   the same as JSON, for the Homarr Updates card (update-status.sh)
 # "update" = newer release in the same major version (usually safe: bump and redeploy).
 # "major"  = a new major version exists (read the upgrade notes first; databases need care).
 set -uo pipefail
@@ -55,21 +56,40 @@ newer_same_major() {  # <image:tag>: the newest tag in the same major version, i
 check() {  # <where> <image:tag>
   local where=$1 ref=$2 name=${2%:*} tag=${2##*:} all same major
   all=$(versions "$ref")
-  if [ -z "$all" ]; then printf '%-28s %-34s %s\n' "${name##*/}" "$tag" "(could not read tags)"; return; fi
+  if [ -z "$all" ]; then
+    if $json; then jq -nc --arg a "${where%%/*}" --arg i "${name##*/}" --arg t "$tag" '{app: $a, image: $i, pinned: $t, update: null, major: null, unreadable: true}'
+    else printf '%-28s %-34s %s\n' "${name##*/}" "$tag" "(could not read tags)"; fi
+    return
+  fi
   local cur_major; cur_major=$(grep -oE '^[^0-9]*[0-9]+' <<<"$tag")
   same=$(grep -E "^${cur_major}([^0-9]|$)" <<<"$all" | tail -1)
   major=$(tail -1 <<<"$all")
   local note=""
   [ "$same" != "$tag" ] && [ "$(printf '%s\n%s\n' "$tag" "$same" | sort -V | tail -1)" = "$same" ] && note="update: $same"
   [ "$major" != "$same" ] && note="${note:+$note, }major: $major"
-  printf '%-28s %-34s %s\n' "${name##*/}" "$tag" "${note:-up to date}"
+  if $json; then
+    jq -nc --arg a "${where%%/*}" --arg i "${name##*/}" --arg t "$tag" --arg u "${note:+$same}" --arg m "$major" --arg s "$same" \
+      '{app: $a, image: $i, pinned: $t, update: (if ($u != "" and $u != $t) then $u else null end),
+        major: (if $m != $s then $m else null end), unreadable: false}'
+  else printf '%-28s %-34s %s\n' "${name##*/}" "$tag" "${note:-up to date}"; fi
 }
 
 # Sourced by update.sh for the functions above; run directly, it prints the table.
 [ "${BASH_SOURCE[0]}" = "$0" ] || return 0
+json=false; [ "${1:-}" = --json ] && json=true
 
-printf '%-28s %-34s %s\n' "image" "pinned" "newer"
-for f in */docker-compose.yml; do
-  grep -E '^\s*image:' "$f" | awk '{print $2}' | tr -d '"' | while read -r ref; do check "$f" "$ref"; done
-done
-grep -E '^FROM ' caddy/Dockerfile | awk '{print $2}' | while read -r ref; do check caddy/Dockerfile "$ref"; done
+all_images() {
+  for f in */docker-compose.yml; do
+    grep -E '^\s*image:' "$f" | awk '{print $2}' | tr -d '"' | while read -r ref; do check "$f" "$ref"; done
+  done
+  grep -E '^FROM ' caddy/Dockerfile | awk '{print $2}' | while read -r ref; do check caddy/Dockerfile "$ref"; done
+}
+if $json; then
+  # One object: when, how many apps are behind (same major) or have a new major, and each image
+  all_images | jq -s --arg now "$(date -u +%Y-%m-%dT%H:%M:%SZ)" '{checked: $now,
+    behind: ([.[] | select(.update)] | length), majors: ([.[] | select(.major)] | length),
+    unreadable: ([.[] | select(.unreadable)] | length), images: .}'
+else
+  printf '%-28s %-34s %s\n' "image" "pinned" "newer"
+  all_images
+fi

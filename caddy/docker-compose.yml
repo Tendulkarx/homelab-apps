@@ -14,6 +14,8 @@ services:
       - ./etc:/etc/caddy:ro
       - ./data:/data
       - ./config:/config
+      # Status files for Homarr (update-status.sh writes /opt/status/updates.json)
+      - /opt/status:/srv/status:ro
     networks:
       - proxy
 

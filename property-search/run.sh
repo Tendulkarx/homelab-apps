@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 # The only command n8n's SSH key may run (forced command in the admin user's ~/.ssh/authorized_keys).
 # By hand: ./run.sh [run|check|import-sheet|migrate] [options]; no arguments means a normal run.
-# Each run writes logs/property_search_<time>.log and keeps its container so Dozzle can show it;
-# containers go after 14 days, log files after 90. logs/ is 1777 like /tmp: the app runs as UID
+# Each run writes logs/property_search_<time>.log (kept 90 days). A run that succeeds removes its
+# container, so the Homarr and Dozzle container lists show only failed runs ("Exited"); those stay
+# until the next successful run, which removes them too. The exit status goes back to n8n. logs/ is 1777 like /tmp: the app runs as UID
 # 10001 and the admin user, owning the folder, can still delete.
 #
 # Before each run it brings /opt/docker up to date when the only changes waiting on GitHub are
@@ -42,10 +43,14 @@ main() {
   fast_forward_homelab_apps
   stamp=$(date +%Y-%m-%d_%H-%M-%S)
   mkdir -p logs && chmod 1777 logs
-  docker container prune --force --filter label=com.docker.compose.project=property-search --filter until=336h >/dev/null
   find logs -name 'property_search_*.log*' -mtime +90 -delete
-  exec docker compose run --name "property-search_$stamp" --no-TTY property-search \
-    "${@:-run}" --log-file "/logs/property_search_$stamp.log"
+  local rc=0
+  docker compose run --name "property-search_$stamp" --no-TTY property-search \
+    "${@:-run}" --log-file "/logs/property_search_$stamp.log" || rc=$?
+  if [ "$rc" -eq 0 ]; then
+    docker container prune --force --filter label=com.docker.compose.project=property-search >/dev/null
+  fi
+  return "$rc"
 }
 
 # Read to the end before running: the update above may replace this file.

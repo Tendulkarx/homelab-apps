@@ -84,3 +84,10 @@
 		respond "Not found" 404
 	}
 }
+
+# Internal only (port 8099 is not published): files for Homarr's custom cards, read by Homarr as
+# http://caddy:8099/<file> over the proxy network. updates.json comes from update-status.sh.
+http://:8099 {
+	root * /srv/status
+	file_server
+}
