@@ -49,6 +49,13 @@ main() {
     "${@:-run}" --log-file "/logs/property_search_$stamp.log" || rc=$?
   if [ "$rc" -eq 0 ]; then
     docker container prune --force --filter label=com.docker.compose.project=property-search >/dev/null
+    # Older releases' images: each is about 250 MB and nothing uses them after a good run
+    local keep
+    keep=$(docker compose --profile job config --images | grep -m1 '/property-search:' || true)
+    if [ -n "$keep" ]; then
+      docker images --format '{{.Repository}}:{{.Tag}}' "${keep%:*}" | grep -vxF "$keep" \
+        | xargs -r docker image rm >/dev/null 2>&1 || true
+    fi
   fi
   return "$rc"
 }

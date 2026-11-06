@@ -147,7 +147,8 @@ apps=$1 old=$2
 cd /opt/docker && git pull -q --ff-only
 for a in $apps; do
   cd "/opt/docker/$a"
-  if [ "$a" = caddy ]; then docker compose build -q --pull && docker compose up -d --quiet-pull
+  # Caddy is built here; drop the build cache each time (it grew to 11 GB by 2026-11-06)
+  if [ "$a" = caddy ]; then docker compose build -q --pull && docker compose up -d --quiet-pull && docker builder prune -f >/dev/null
   else docker compose pull -q && docker compose up -d --quiet-pull; fi
   echo "  $a: $(docker compose ps --format '{{.Name}} {{.Status}}' | paste -sd ',' -)"
 done
