@@ -8,6 +8,10 @@ services:
     ports:
       - "10.69.20.114:1521:1521"
     volumes:
+      # data/dbconfig/FREE/listener.ora lives here, not in the image. The image writes the
+      # container's hostname into it on first start, so a recreated container (new hostname)
+      # left the listener down: "connect ECONNREFUSED 10.69.20.114:1521" (2026-11-06). It now
+      # says HOST = 0.0.0.0; keep it that way if the file is ever rebuilt.
       - ./data:/opt/oracle/oradata
     networks:
       - proxy
