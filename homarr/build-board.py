@@ -66,6 +66,7 @@ APPS = [
     ("Status page", "Every monitor on one page", "uptime-kuma", f"https://uptime.{DOMAIN}/status/homelab", ""),
     ("Logs", "Dozzle: container logs, all hosts", "dozzle", f"https://logs.{DOMAIN}", f"https://logs.{DOMAIN}"),
     ("Arcane", "Docker stacks on prdsrv1", "arcane", f"https://arcane.{DOMAIN}", f"https://arcane.{DOMAIN}"),
+    ("Homelable", "Lab map: network, rack and docs", "homelable", f"https://homelable.{DOMAIN}", f"https://homelable.{DOMAIN}/api/v1/health"),
     ("Pi-hole", "DNS and ad blocking (primary)", "pi-hole", f"https://pihole.{DOMAIN}/admin", f"https://pihole.{DOMAIN}/admin"),
     ("prx1", "Proxmox VE: prdsrv1, prdsrv2, tstsrv1", "proxmox", f"https://prx1.{DOMAIN}", f"https://prx1.{DOMAIN}"),
     ("prx2", "Proxmox VE: prdsrv3", "proxmox", f"https://prx2.{DOMAIN}", f"https://prx2.{DOMAIN}"),

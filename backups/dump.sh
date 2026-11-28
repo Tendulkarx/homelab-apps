@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Nightly dumps of the databases and app data on this host, into /opt/backups/<date>/ (14 days
 # kept). Each part runs only where its container runs: Postgres, SQL Server and Oracle on
-# prdsrv2; n8n and Paperless on prdsrv1. Run by the systemd timer db-dumps.timer at 01:30,
+# prdsrv2; n8n, Paperless, Homarr and Homelable on prdsrv1. Run by the systemd timer db-dumps.timer at 01:30,
 # before the 02:30 VM backup, so each night's dumps are also inside that backup.
 # By hand: sudo /opt/docker/backups/dump.sh
 #
@@ -14,6 +14,7 @@
 #   paperless.tar.gz     document_exporter output: document_importer restores it
 #   homarr/db.sqlite     Homarr's boards, apps and integrations (online copy; its secrets need
 #                        SECRET_ENCRYPTION_KEY from 1Password homelab-homarr)
+#   homelable/homelab.db Homelable's canvas, inventory and docs (online copy), plus uploads/
 #
 # One part failing does not stop the others; the exit code is then 1 and the heartbeat is
 # not sent, so Uptime Kuma reports it. Passwords are read inside each container from its own
@@ -103,6 +104,19 @@ PY
   log "homarr $(du -h "$OUT/homarr/db.sqlite" | cut -f1)"
 }
 
+homelable() {
+  mkdir -p "$OUT/homelable"
+  python3 - "$OUT/homelable/homelab.db" <<'PY' || return 1
+import sqlite3, sys
+src = sqlite3.connect("file:/opt/docker/homelable/data/homelab.db?mode=ro", uri=True)
+dst = sqlite3.connect(sys.argv[1])
+src.backup(dst)
+dst.close()
+PY
+  [ -d /opt/docker/homelable/data/uploads ] && cp -r /opt/docker/homelable/data/uploads "$OUT/homelable/"
+  log "homelable $(du -sh "$OUT/homelable" | cut -f1)"
+}
+
 paperless() {
   docker exec paperless-webserver document_exporter ../export --delete --no-progress-bar > /dev/null || return 1
   tar -C /opt/docker/paperless -czf "$OUT/paperless.tar.gz" export || return 1
@@ -111,7 +125,7 @@ paperless() {
 
 # part:container that must be running on this host for the part to apply
 ran=0
-for pc in postgres:postgres sqlserver:sqlserver oracle:oracle n8n:n8n paperless:paperless-webserver homarr:homarr; do
+for pc in postgres:postgres sqlserver:sqlserver oracle:oracle n8n:n8n paperless:paperless-webserver homarr:homarr homelable:homelable-backend; do
   here "${pc#*:}" || continue
   ran=$((ran + 1))
   "${pc%%:*}" || fail "${pc%%:*}"

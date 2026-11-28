@@ -48,6 +48,14 @@ description = "Docker stacks on prdsrv1"
 
 [[tile]]
 group = "Apps"
+name = "Homelable"
+href = "https://homelable.{DOMAIN}"
+icon = "homelable"
+ping = "https://homelable.{DOMAIN}/api/v1/health"
+description = "Lab map: network, rack and docs"
+
+[[tile]]
+group = "Apps"
 name = "GitHub"
 href = "https://github.com/Tendulkarx?tab=repositories"
 icon = "github"

@@ -2,7 +2,8 @@
 # The backend stays on this stack's own network; only the frontend (nginx, which proxies /api to
 # `backend`) joins `proxy` for Caddy. On a bridge network the scanner sees addresses and open
 # ports but no MAC addresses; that is the trade for not putting it on the host network.
-# The optional MCP service is left out. Data (SQLite, uploads) is in ./data, covered by the
+# Proxmox: read-only user homelable@pve (PVEAuditor), token `map` on prx1 and prx2, in .env as
+# PROXMOX_ENDPOINTS. The optional MCP service is left out. Data (SQLite, uploads) is in ./data, covered by the
 # nightly Proxmox backup of prdsrv1.
 services:
   backend:
@@ -17,6 +18,10 @@ services:
       - AUTH_MODE=local
       - SCANNER_RANGES=["10.69.20.0/24","10.69.10.0/24"]
       - STATUS_CHECKER_INTERVAL=60
+      # UniFi import (names and MACs the bridge scan cannot see); key in .env
+      - UNIFI_HOST=10.69.1.1
+      - UNIFI_SITE=default
+      - UNIFI_VERIFY_TLS=false
     cap_add:
       - NET_RAW
     volumes:
