@@ -19,6 +19,7 @@ Each host checks out only its own folders (listed in `hosts/<host>`, see `hosts/
 | `metabase` | prdsrv1 | Reporting | `metabase.` |
 | `dozzle` | prdsrv1 | Live logs of every container on all three hosts (login in 1Password `homelab-dozzle`) | `logs.` |
 | `homarr` | prdsrv1 | Dashboard: every app, host, VM, container, DNS and monitor on one page (replaced Homepage 2026-09-30) | `home.`, `dash.` |
+| `homelable` | prdsrv1 | Map of the lab (network canvas, rack view, docs) with live status checks (login in 1Password `homelab-homelable`) | `homelable.` |
 | `docker-socket-proxy` | all three | Read-only Docker API for Homarr and the Beszel agents (lists containers, refuses everything else) | port 2375, prdsrv1 only |
 | `beszel-agent` | all three | Sends the host's CPU, memory, disk, network and container stats to the Beszel hub; connects out, listens on no port | none |
 | `arcane` | prdsrv1 | Docker web UI for prdsrv1's stacks (edits the files in this repo on the server); sees only this host's folders and containers | `arcane.` |

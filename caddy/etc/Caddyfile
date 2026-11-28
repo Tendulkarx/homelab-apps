@@ -33,6 +33,12 @@
 		reverse_proxy n8n:5678
 	}
 
+	# Homelable, the lab map
+	@homelable host homelable.{$CADDY_BASE_DOMAIN}
+	handle @homelable {
+		reverse_proxy homelable:80
+	}
+
 	@logs host logs.{$CADDY_BASE_DOMAIN}
 	handle @logs {
 		reverse_proxy dozzle:8080

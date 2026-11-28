@@ -1,0 +1,40 @@
+# Homelable: a map of the lab (canvas, rack view, docs) with live status checks, at homelable.<domain>.
+# The backend stays on this stack's own network; only the frontend (nginx, which proxies /api to
+# `backend`) joins `proxy` for Caddy. On a bridge network the scanner sees addresses and open
+# ports but no MAC addresses; that is the trade for not putting it on the host network.
+# The optional MCP service is left out. Data (SQLite, uploads) is in ./data, covered by the
+# nightly Proxmox backup of prdsrv1.
+services:
+  backend:
+    image: ghcr.io/pouzor/homelable-backend:3.8.0
+    container_name: homelable-backend
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      - TZ=Europe/London
+      - SQLITE_PATH=/app/data/homelab.db
+      - CORS_ORIGINS=["https://homelable.${DOMAIN:?required variable DOMAIN is missing a value}"]
+      - AUTH_MODE=local
+      - SCANNER_RANGES=["10.69.20.0/24","10.69.10.0/24"]
+      - STATUS_CHECKER_INTERVAL=60
+    cap_add:
+      - NET_RAW
+    volumes:
+      - ./data:/app/data
+
+  frontend:
+    image: ghcr.io/pouzor/homelable-frontend:3.8.0
+    container_name: homelable
+    restart: unless-stopped
+    depends_on:
+      - backend
+    # Localhost only, for checks on the server; the web address goes through Caddy.
+    ports:
+      - "127.0.0.1:3040:80"
+    networks:
+      - default
+      - proxy
+
+networks:
+  proxy:
+    external: true
